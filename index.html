@@ -1,0 +1,146 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Penguin Mascot</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600;800;900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #F7F9FC; --card: #FFFFFF; --ink: #1B2440; --muted: #6B7590; --line: #E3E8F2;
+    --green: #58CC02; --green-d: #46A302; --red: #FF4B4B; --red-d: #D33131; --blue: #1CB0F6; --blue-d: #1899D6;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) { --bg: #131A2E; --card: #1C2540; --ink: #EEF2FF; --muted: #A3ADC8; --line: #2D3858; }
+  }
+  :root[data-theme="dark"] { --bg: #131A2E; --card: #1C2540; --ink: #EEF2FF; --muted: #A3ADC8; --line: #2D3858; }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink); font-family: Nunito, system-ui, sans-serif; }
+  main { max-width: 980px; margin: 0 auto; padding: 24px 16px 48px; }
+  h1 { font-weight: 900; font-size: clamp(26px, 5vw, 38px); margin: 0 0 4px; }
+  .sub { color: var(--muted); margin: 0 0 24px; font-weight: 600; }
+  .layout { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 20px; }
+  @media (max-width: 760px) { .layout { grid-template-columns: 1fr; } }
+  .card { background: var(--card); border: 2px solid var(--line); border-radius: 20px; padding: 20px; }
+  .stage { display: grid; place-items: center; min-height: 340px; position: relative; }
+  .state-label { position: absolute; top: 14px; left: 16px; font-weight: 800; color: var(--muted); font-size: 14px; }
+  h2 { font-size: 15px; font-weight: 900; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); margin: 0 0 12px; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(118px, 1fr)); gap: 10px; margin-bottom: 20px; }
+  button {
+    font: inherit; font-weight: 800; font-size: 15px; cursor: pointer; border-radius: 14px; padding: 11px 10px;
+    border: 2px solid var(--line); border-bottom-width: 5px; background: var(--card); color: var(--ink);
+    transition: transform .06s, border-color .15s;
+  }
+  button:hover { border-color: var(--blue); }
+  button:active { transform: translateY(3px); border-bottom-width: 2px; margin-bottom: 3px; }
+  button[aria-pressed="true"] { border-color: var(--blue); background: color-mix(in srgb, var(--blue) 14%, var(--card)); }
+  button small { display: block; font-weight: 600; font-size: 12px; color: var(--muted); }
+  .controls { display: flex; flex-wrap: wrap; gap: 16px; align-items: center; font-weight: 700; color: var(--muted); }
+  .controls label { display: flex; gap: 8px; align-items: center; }
+  .quiz { margin-top: 20px; }
+  .quiz p { font-weight: 800; font-size: 18px; margin: 0 0 12px; }
+  .answers { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .answers button.ok { background: var(--green); border-color: var(--green-d); color: #fff; }
+  .answers button.bad { background: var(--red); border-color: var(--red-d); color: #fff; }
+  pre { background: var(--bg); border: 2px solid var(--line); border-radius: 14px; padding: 14px; overflow-x: auto; font-size: 13px; line-height: 1.5; margin: 0; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Pingu, linh vật chim cánh cụt</h1>
+  <p class="sub">Bấm vào từng nút để xem animation. Dùng được trong mọi web app bằng thẻ <code>&lt;penguin-mascot&gt;</code>.</p>
+
+  <div class="layout">
+    <section class="card stage">
+      <span class="state-label" id="label">idle</span>
+      <penguin-mascot id="pg" size="260"></penguin-mascot>
+    </section>
+
+    <section class="card">
+      <h2>Lặp liên tục</h2>
+      <div class="grid" id="loops"></div>
+      <h2>Chạy một lần</h2>
+      <div class="grid" id="shots"></div>
+      <div class="controls">
+        <label><input type="checkbox" id="cap"> Đội mũ tốt nghiệp</label>
+        <label>Kích thước <input type="range" id="size" min="120" max="320" value="260"></label>
+      </div>
+    </section>
+  </div>
+
+  <section class="card quiz">
+    <h2>Thử trong bài học</h2>
+    <p>“Penguin” trong tiếng Việt là gì?</p>
+    <div class="answers">
+      <button data-correct="true">Chim cánh cụt</button>
+      <button>Con cá voi</button>
+      <button>Con hải cẩu</button>
+      <button>Con gấu Bắc Cực</button>
+    </div>
+  </section>
+
+  <section class="card quiz">
+    <h2>Cách dùng</h2>
+<pre><code>&lt;script src="penguin.js"&gt;&lt;/script&gt;
+&lt;penguin-mascot id="pg" size="200" accessory="cap"&gt;&lt;/penguin-mascot&gt;
+
+&lt;script&gt;
+  const pg = document.getElementById('pg');
+  pg.play('happy');                  // trả lời đúng
+  await pg.play('sad');              // chờ animation xong
+  pg.setAttribute('state', 'think'); // hoặc đổi bằng thuộc tính
+&lt;/script&gt;</code></pre>
+  </section>
+</main>
+
+<script src="penguin.js"></script>
+<script>
+  const LABELS = {
+    idle: ['Đứng chờ', 'thở, chớp mắt'], think: ['Suy nghĩ', 'đang chờ trả lời'], sleep: ['Ngủ', 'lâu không học'],
+    dance: ['Nhảy múa', 'vui vẻ'], walk: ['Đi lạch bạch', 'chuyển màn'], talk: ['Nói chuyện', 'khi đọc hướng dẫn'],
+    wave: ['Vẫy tay', 'chào mừng'], happy: ['Vui', 'trả lời đúng'], celebrate: ['Ăn mừng', 'xong bài học'],
+    sad: ['Buồn', 'trả lời sai'], surprised: ['Ngạc nhiên', 'điều bất ngờ'], no: ['Lắc đầu', 'không đúng'],
+    yes: ['Gật đầu', 'đồng ý'], love: ['Thả tim', 'cảm ơn bạn'], streak: ['Chuỗi ngày', 'giữ streak']
+  };
+  const pg = document.getElementById('pg');
+  const label = document.getElementById('label');
+  const { LOOPING, ONE_SHOT } = window.PenguinMascot;
+  const buttons = [];
+
+  function addButtons(container, list) {
+    list.forEach((s) => {
+      const b = document.createElement('button');
+      b.dataset.state = s;
+      b.innerHTML = LABELS[s][0] + '<small>' + LABELS[s][1] + '</small>';
+      b.onclick = () => pg.play(s);
+      container.appendChild(b);
+      buttons.push(b);
+    });
+  }
+  addButtons(document.getElementById('loops'), LOOPING);
+  addButtons(document.getElementById('shots'), Object.keys(ONE_SHOT));
+
+  pg.addEventListener('statechange', (e) => {
+    label.textContent = e.detail.state;
+    buttons.forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.state === e.detail.state)));
+  });
+
+  document.getElementById('cap').onchange = (e) =>
+    e.target.checked ? pg.setAttribute('accessory', 'cap') : pg.removeAttribute('accessory');
+  document.getElementById('size').oninput = (e) => pg.setAttribute('size', e.target.value);
+
+  document.querySelectorAll('.answers button').forEach((b) => {
+    b.onclick = async () => {
+      document.querySelectorAll('.answers button').forEach((x) => x.classList.remove('ok', 'bad'));
+      const correct = b.dataset.correct === 'true';
+      b.classList.add(correct ? 'ok' : 'bad');
+      await pg.play(correct ? 'celebrate' : 'sad');
+      b.classList.remove('ok', 'bad');
+    };
+  });
+
+  setTimeout(() => pg.play('wave'), 400);
+</script>
+</body>
+</html>
