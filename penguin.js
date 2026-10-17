@@ -187,6 +187,8 @@
 
     /* Mặc định ẩn các biểu cảm phụ và hiệu ứng */
     '.pg-eyes-happy,.pg-eyes-closed,.pg-eyes-heart,.pg-brows,.pg-cap,.pg-fx>*{opacity:0}',
+    // giọt nước mắt / mồ hôi nằm trong <g transform> để mỗi phiên bản dịch vị trí; tự ẩn bằng opacity của chính nó
+    '.pg-fx>g:not([class]){opacity:1}.pg-tear,.pg-sweat{opacity:0}',
     '.pg-flame{transform:scale(0)}',
     '.pg-mouth{transform:scaleY(0)}',
     ':host([accessory~="cap"]) .pg-cap{opacity:1}',
@@ -478,4 +480,234 @@
   };
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
   if (typeof window !== 'undefined') window.PenguinMascot = api;
+})();
+
+/* Phiên bản "plush": bé chim cánh cụt bông lông xám, mặt trắng, mỏ vàng (theo ảnh thú bông). */
+(function () {
+  var P = typeof window !== 'undefined' ? window.PenguinMascot : module.exports;
+  var N = 'plush-';
+  var INK = '#23262E';
+
+  // ---- geometry (cubic segments, clockwise) ----
+  var HEAD = [[100, 23, 148, 23, 179, 52, 179, 96], [179, 96, 179, 124, 150, 141, 100, 141],
+    [100, 141, 50, 141, 21, 124, 21, 96], [21, 96, 21, 52, 52, 23, 100, 23]];
+  var BODY = [[100, 120, 140, 120, 163, 136, 165, 162], [165, 162, 168, 198, 148, 224, 100, 224],
+    [100, 224, 52, 224, 32, 198, 35, 162], [35, 162, 37, 136, 60, 120, 100, 120]];
+  // white face mask lobes (left lobe going up/over/down, right lobe mirrored)
+  var LOBE_L = [[24, 124, 28, 112, 34, 100, 37, 90], [37, 90, 40, 76, 50, 66, 62, 66],
+    [62, 66, 74, 66, 82, 72, 84, 80], [84, 80, 86, 88, 86, 94, 88, 98]];
+  var LOBE_R = LOBE_L.map(function (s) {
+    return [200 - s[6], s[7], 200 - s[4], s[5], 200 - s[2], s[3], 200 - s[0], s[1]];
+  }).reverse();
+
+  function dPath(segs, close) {
+    var d = 'M' + segs[0][0] + ' ' + segs[0][1];
+    segs.forEach(function (s) { d += ' C' + s.slice(2).join(' '); });
+    return d + (close ? ' Z' : '');
+  }
+  var HEAD_D = dPath(HEAD, 1), BODY_D = dPath(BODY, 1);
+  var MASK_D = 'M100 148 L24 148 L24 124' + dPath(LOBE_L).slice(dPath(LOBE_L).indexOf(' C')) +
+    ' C92 104 96 106 100 106 C104 106 108 104 112 98' + dPath(LOBE_R).slice(dPath(LOBE_R).indexOf(' C')) + ' L176 148 Z';
+
+  // ---- deterministic fur strands ----
+  var seed = 7;
+  function rnd() { seed = (seed * 16807) % 2147483647; return (seed - 1) / 2147483646; }
+  function f1(v) { return Math.round(v * 10) / 10; }
+  function bez(s, t) {
+    var m = 1 - t, a = m * m * m, b = 3 * m * m * t, c = 3 * m * t * t, e = t * t * t;
+    var x = a * s[0] + b * s[2] + c * s[4] + e * s[6], y = a * s[1] + b * s[3] + c * s[5] + e * s[7];
+    var dx = 3 * m * m * (s[2] - s[0]) + 6 * m * t * (s[4] - s[2]) + 3 * t * t * (s[6] - s[4]);
+    var dy = 3 * m * m * (s[3] - s[1]) + 6 * m * t * (s[5] - s[3]) + 3 * t * t * (s[7] - s[5]);
+    var l = Math.sqrt(dx * dx + dy * dy) || 1;
+    return [x, y, dx / l, dy / l];
+  }
+  // strands along an outline: n per segment, pointing outward, length lo..lo+span
+  function fringe(segs, n, lo, span, filter) {
+    var d = '';
+    segs.forEach(function (s) {
+      for (var k = 0; k < n; k++) {
+        var q = bez(s, (k + 0.2 + rnd() * 0.6) / n), nx = q[3], ny = -q[2];
+        if (filter && !filter(q[0], q[1])) continue;
+        var L = lo + rnd() * span, j = (rnd() - 0.5) * 2.4;
+        d += 'M' + f1(q[0] - nx * 1.5) + ' ' + f1(q[1] - ny * 1.5) + 'l' + f1(nx * (L + 1.5) + q[2] * j) + ' ' + f1(ny * (L + 1.5) + q[3] * j);
+      }
+    });
+    return d;
+  }
+  // short strands scattered in an ellipse, flowing away from (ox, oy)
+  function tex(cx, cy, rx, ry, n, ox, oy, len, keep) {
+    var d = '';
+    for (var i = 0; i < n; i++) {
+      var a = rnd() * 6.283, r = Math.sqrt(rnd()), x = cx + Math.cos(a) * rx * r, y = cy + Math.sin(a) * ry * r;
+      if (keep && !keep(x, y)) continue;
+      var vx = x - ox, vy = y - oy, l = Math.sqrt(vx * vx + vy * vy) || 1, L = len * (0.6 + rnd() * 0.8);
+      d += 'M' + f1(x) + ' ' + f1(y) + 'l' + f1(vx / l * L + (rnd() - 0.5)) + ' ' + f1(vy / l * L);
+    }
+    return d;
+  }
+  function strands(d, color, w, op) {
+    return '<path d="' + d + '" fill="none" stroke="' + color + '" stroke-width="' + w + '" stroke-linecap="round"' +
+      (op ? ' opacity="' + op + '"' : '') + '/>';
+  }
+  function inWhite(x, y) {
+    var l = Math.pow((x - 61) / 22, 2) + Math.pow((y - 98) / 29, 2), r = Math.pow((x - 139) / 22, 2) + Math.pow((y - 98) / 29, 2);
+    return l < 0.8 || r < 0.8 || (y > 112 && Math.pow((x - 100) / 74, 2) + Math.pow((y - 96) / 42, 2) < 0.9);
+  }
+
+  function rg(id, cx, cy, r, stops) {
+    var s = '<radialGradient id="' + N + id + '" cx="' + cx + '" cy="' + cy + '" r="' + r + '">';
+    stops.forEach(function (st) {
+      s += '<stop offset="' + st[0] + '" stop-color="' + st[1] + '"' + (st[2] != null ? ' stop-opacity="' + st[2] + '"' : '') + '/>';
+    });
+    return s + '</radialGradient>';
+  }
+  function u(id) { return 'url(#' + N + id + ')'; }
+  function blob(cx, cy, rx, ry, fill) {
+    return '<ellipse cx="' + cx + '" cy="' + cy + '" rx="' + rx + '" ry="' + ry + '" fill="' + u(fill) + '"/>';
+  }
+
+  var defs =
+    // fur: fine fractal noise displaces the edges (fluffy outline) and adds light/dark fibre flecks inside
+    '<filter id="' + N + 'fuzz" x="-8%" y="-8%" width="116%" height="116%" color-interpolation-filters="sRGB">' +
+      '<feTurbulence type="fractalNoise" baseFrequency="0.62" numOctaves="2" seed="4" result="n"/>' +
+      '<feDisplacementMap in="SourceGraphic" in2="n" scale="4" xChannelSelector="R" yChannelSelector="G" result="d"/>' +
+      '<feTurbulence type="fractalNoise" baseFrequency=".95 .28" numOctaves="1" seed="2" result="f"/>' +
+      '<feColorMatrix in="f" values="0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 1.4 0 0 0 -.86" result="h"/>' +
+      '<feColorMatrix in="f" values="0 0 0 0 .22 0 0 0 0 .25 0 0 0 0 .32 0 -1.3 0 0 .45" result="l"/>' +
+      '<feComposite in="h" in2="d" operator="in" result="h2"/>' +
+      '<feComposite in="l" in2="d" operator="in" result="l2"/>' +
+      '<feMerge><feMergeNode in="d"/><feMergeNode in="l2"/><feMergeNode in="h2"/></feMerge>' +
+    '</filter>' +
+    '<filter id="' + N + 'fuzz-s" x="-15%" y="-15%" width="130%" height="130%" color-interpolation-filters="sRGB">' +
+      '<feTurbulence type="fractalNoise" baseFrequency="0.7" numOctaves="1" seed="9" result="n"/>' +
+      '<feDisplacementMap in="SourceGraphic" in2="n" scale="3" xChannelSelector="R" yChannelSelector="G"/>' +
+    '</filter>' +
+    '<clipPath id="' + N + 'headclip"><path d="' + HEAD_D + '"/></clipPath>' +
+    rg('head', '50%', '20%', '80%', [[0, '#606A7B'], [0.45, '#6E798A'], [0.82, '#7C8798'], [1, '#768193']]) +
+    rg('mask', '50%', '42%', '62%', [[0, '#F7F7F4'], [0.68, '#F1F1EE'], [1, '#DDE0E4']]) +
+    rg('body', '50%', '38%', '64%', [[0, '#BEC7D3'], [0.62, '#AEB8C6'], [1, '#97A2B3']]) +
+    rg('belly', '50%', '50%', '50%', [[0, '#D2D9E2'], [0.6, '#C9D1DC', 0.8], [1, '#C9D1DC', 0]]) +
+    rg('shade', '50%', '50%', '50%', [[0, '#3E4757', 0.42], [1, '#3E4757', 0]]) +
+    rg('dark', '50%', '50%', '50%', [[0, '#525C6D', 0.55], [1, '#525C6D', 0]]) +
+    rg('light', '50%', '50%', '50%', [[0, '#8C97A8', 0.65], [1, '#8C97A8', 0]]) +
+    rg('mot', '50%', '50%', '50%', [[0, '#DCE2EA', 0.55], [1, '#DCE2EA', 0]]) +
+    rg('wing', '45%', '20%', '85%', [[0, '#B7C0CD'], [0.7, '#A8B2C0'], [1, '#949FB0']]) +
+    rg('foot', '42%', '30%', '75%', [[0, '#F8E38F'], [0.55, '#F2D46B'], [1, '#DDB547']]) +
+    rg('eye', '38%', '35%', '70%', [[0, '#3B3D45'], [1, '#0B0C0F']]) +
+    rg('blush', '50%', '50%', '50%', [[0, '#F59AAE'], [1, '#F59AAE', 0]]) +
+    '<linearGradient id="' + N + 'beak" x1="0" y1="0" x2="0" y2="1">' +
+      '<stop offset="0" stop-color="#F7DE80"/><stop offset=".55" stop-color="#F2D46B"/><stop offset="1" stop-color="#E9C95E"/>' +
+    '</linearGradient>' +
+    '<linearGradient id="' + N + 'beakb" x1="0" y1="0" x2="0" y2="1">' +
+      '<stop offset="0" stop-color="#EACB60"/><stop offset="1" stop-color="#E3BE4F"/>' +
+    '</linearGradient>';
+
+  // Bead eye: everything inside .pg-pupil so look/scale moves the whole bead
+  function eye(side, cx, cy) {
+    return '<g class="pg-eye pg-eye-' + side + '"><g class="pg-pupil">' +
+      '<circle cx="' + cx + '" cy="' + cy + '" r="6.6" fill="' + u('eye') + '"/>' +
+      '<circle cx="' + (cx + 2.3) + '" cy="' + (cy - 2.4) + '" r="2.1" fill="#fff"/>' +
+      '<circle cx="' + (cx - 2.2) + '" cy="' + (cy + 2.6) + '" r=".9" fill="#fff" opacity=".7"/>' +
+    '</g></g>';
+  }
+
+  // Stubby flipper hanging from shoulder pivot (px, py), tilted a deg outward (sign = side)
+  var WSEGS = [[0, -21, 9, -21, 15, -10, 15, 2], [15, 2, 15, 15, 8, 22, 0, 22], [0, 22, -8, 22, -15, 15, -15, 2], [-15, 2, -15, -10, -9, -21, 0, -21]];
+  function wing(side, px, py, a) {
+    var r = a * Math.PI / 180, cx = f1(px - Math.sin(r) * 13), cy = f1(py + Math.cos(r) * 13);
+    return '<g class="pg-wing-' + side + '"><g transform="translate(' + cx + ' ' + cy + ') rotate(' + a + ')" filter="' + u('fuzz') + '">' +
+      '<ellipse cx="' + (a > 0 ? 3.5 : -3.5) + '" cy="4" rx="14" ry="20" fill="#3E4757" opacity=".28"/>' +
+      '<path d="' + dPath(WSEGS, 1) + '" fill="' + u('wing') + '"/>' +
+      strands(fringe(WSEGS, 12, 0.6, 1.8), '#A3ADBC', 1.2) +
+    '</g></g>';
+  }
+
+  function foot(side, cx) {
+    var d = side === 'l' ? -1 : 1;
+    return '<g class="pg-foot-' + side + '"><g filter="' + u('fuzz-s') + '">' +
+      '<path d="M' + (cx - 18) + ' 218 C' + (cx - 19) + ' 208 ' + (cx - 10) + ' 202 ' + cx + ' 202 C' + (cx + 10) + ' 202 ' + (cx + 19) + ' 208 ' + (cx + 18) + ' 218 ' +
+        'C' + (cx + 17) + ' 225 ' + (cx + 9) + ' 227 ' + cx + ' 227 C' + (cx - 9) + ' 227 ' + (cx - 17) + ' 225 ' + (cx - 18) + ' 218 Z" fill="' + u('foot') + '"/>' +
+      '<path d="M' + (cx - 6.5) + ' 227 q1 -4 0 -6 M' + (cx + 6.5) + ' 227 q-1 -4 0 -6" fill="none" stroke="#D8B044" stroke-width="1.4" stroke-linecap="round" opacity=".8"/>' +
+      '<ellipse cx="' + (cx + d * -4) + '" cy="208" rx="7" ry="3" fill="#FFF6C8" opacity=".45"/>' +
+    '</g></g>';
+  }
+
+  var tufts = 'M95 30 C90 24 90 17 95 13 C95 19 98 24 101 28 Z M100 28 C100 21 103 15 110 14 C106 19 105 24 107 30 Z' +
+    'M88 32 C83 29 81 24 83 19 C85 24 89 27 94 29 Z M106 30 C110 26 115 24 119 25 C115 27 112 30 111 33 Z';
+
+  var character =
+    '<g class="pg-bodyg">' +
+      // body
+      '<g filter="' + u('fuzz') + '">' +
+        '<path d="' + BODY_D + '" fill="' + u('body') + '"/>' +
+        blob(100, 186, 46, 36, 'belly') +
+        blob(78, 200, 14, 10, 'mot') + blob(121, 176, 12, 9, 'mot') + blob(106, 212, 16, 7, 'mot') +
+        strands(fringe(BODY, 34, 0.8, 2), '#A9B3C1', 1.2) +
+        blob(100, 142, 64, 13, 'shade') +
+      '</g>' +
+      // head
+      '<g filter="' + u('fuzz') + '">' +
+        '<path d="' + HEAD_D + '" fill="' + u('head') + '"/>' +
+        '<g clip-path="' + u('headclip') + '">' +
+          blob(100, 46, 58, 26, 'dark') + blob(100, 74, 20, 26, 'dark') +
+          blob(32, 104, 14, 26, 'light') + blob(168, 104, 14, 26, 'light') +
+        '</g>' +
+        strands(fringe(HEAD, 40, 0.8, 2.2, function (x, y) { return y < 121; }), '#6C778A', 1.2) +
+        '<g clip-path="' + u('headclip') + '">' +
+          '<path d="' + MASK_D + '" fill="' + u('mask') + '"/>' +
+          strands(fringe(LOBE_L, 16, 0.6, 2) + fringe(LOBE_R, 16, 0.6, 2), '#EFEFEC', 1.2) +
+        '</g>' +
+        strands(fringe(HEAD.slice(1, 3), 40, 0.6, 2, function (x, y) { return y >= 121; }), '#E9EAE8', 1.2) +
+        '<g transform="translate(0 4)"><path d="' + tufts + '" fill="#5A6475"/>' +
+        strands('M97 29l-4 -10M101 28l1 -11M104 30l5 -9M92 31l-7 -6', '#5A6475', 1.6) + '</g>' +
+      '</g>' +
+      '<g transform="translate(100 33) rotate(-6) scale(1.1) translate(-100 -44)">' + P.CAP + '</g>' +
+      '<g class="pg-face">' +
+        '<g class="pg-brows" fill="none" stroke="' + INK + '" stroke-width="3.2" stroke-linecap="round">' +
+          '<path class="pg-brow-l" d="M57.5 83.5 Q64 81 70.5 83"/>' +
+          '<path class="pg-brow-r" d="M129.5 83 Q136 81 142.5 83.5"/>' +
+        '</g>' +
+        eye('l', 64, 94) + eye('r', 136, 94) +
+        '<g class="pg-eyes-happy" fill="none" stroke="' + INK + '" stroke-width="3.4" stroke-linecap="round">' +
+          '<path d="M57 97 Q64 87 71 97"/><path d="M129 97 Q136 87 143 97"/>' +
+        '</g>' +
+        '<g class="pg-eyes-closed" fill="none" stroke="' + INK + '" stroke-width="3" stroke-linecap="round">' +
+          '<path d="M57 93 Q64 100 71 93"/><path d="M129 93 Q136 100 143 93"/>' +
+        '</g>' +
+        '<g class="pg-eyes-heart" fill="#FF4B6E">' +
+          '<g transform="translate(64 95) scale(.78)"><path class="pg-heart-eye" d="' + P.HEART + '"/></g>' +
+          '<g transform="translate(136 95) scale(.78)"><path class="pg-heart-eye" d="' + P.HEART + '"/></g>' +
+        '</g>' +
+        '<ellipse class="pg-cheek pg-cheek-l" cx="54" cy="109" rx="9" ry="5.5" fill="' + u('blush') + '"/>' +
+        '<ellipse class="pg-cheek pg-cheek-r" cx="146" cy="109" rx="9" ry="5.5" fill="' + u('blush') + '"/>' +
+        '<ellipse class="pg-mouth" cx="100" cy="112" rx="9" ry="6" fill="#8B1E3F"/>' +
+        '<path class="pg-beak-bot" d="M85 103 C92 107.5 108 107.5 115 103 C114.5 112 108 118.5 100 118.5 C92 118.5 85.5 112 85 103 Z" fill="' + u('beakb') + '"/>' +
+        '<g class="pg-beak-top">' +
+          '<path d="M78 94.5 C78 88.8 90 88 100 88 C110 88 122 88.8 122 94.5 C122 102 111 108 100 109.5 C89 108 78 102 78 94.5 Z" fill="' + u('beak') + '"/>' +
+          '<ellipse cx="97" cy="93" rx="13" ry="3.6" fill="#FFF3B8" opacity=".45"/>' +
+        '</g>' +
+      '</g>' +
+      wing('l', 41, 149, 38) + wing('r', 159, 149, -38) +
+    '</g>' +
+    foot('l', 71) + foot('r', 129);
+
+  var css =
+    '.pg-root{transform-origin:100px 226px}' +
+    '.pg-bodyg{transform-origin:100px 224px}' +
+    '.pg-eye-l{transform-origin:64px 94px}.pg-eye-r{transform-origin:136px 94px}' +
+    '.pg-eye-l .pg-pupil{transform-origin:64px 94px}.pg-eye-r .pg-pupil{transform-origin:136px 94px}' +
+    '.pg-wing-l{transform-origin:41px 149px}.pg-wing-r{transform-origin:159px 149px}' +
+    '.pg-foot-l{transform-origin:71px 227px}.pg-foot-r{transform-origin:129px 227px}' +
+    '.pg-beak-bot,.pg-mouth{transform-origin:100px 107px}' +
+    '.pg-cheek-l{transform-origin:54px 109px}.pg-cheek-r{transform-origin:146px 109px}' +
+    '.pg-brow-l{transform-origin:64px 83px}.pg-brow-r{transform-origin:136px 83px}' +
+    '.pg-face{transform-origin:100px 100px}';
+
+  P.registerVariant('plush', {
+    label: 'Plush',
+    defs: defs,
+    character: character,
+    css: css,
+    fx: { tear: [-9, -3], sweat: [4, -2] }
+  });
 })();
