@@ -12,12 +12,12 @@
     --green: #58CC02; --green-d: #46A302; --red: #FF4B4B; --red-d: #D33131; --blue: #1CB0F6; --blue-d: #1899D6;
   }
   @media (prefers-color-scheme: dark) {
-    :root:not([data-theme="light"]) { --bg: #131A2E; --card: #1C2540; --ink: #EEF2FF; --muted: #A3ADC8; --line: #2D3858; }
+    :root:not([data-theme="light"]) { --bg: #131A2E; --card: #1C2540; --ink: #EEF2FF; --muted: #A3ADC8; --line: #2D3858; color-scheme: dark; }
   }
-  :root[data-theme="dark"] { --bg: #131A2E; --card: #1C2540; --ink: #EEF2FF; --muted: #A3ADC8; --line: #2D3858; }
+  :root[data-theme="dark"] { --bg: #131A2E; --card: #1C2540; --ink: #EEF2FF; --muted: #A3ADC8; --line: #2D3858; color-scheme: dark; }
   * { box-sizing: border-box; }
   body { margin: 0; background: var(--bg); color: var(--ink); font-family: Nunito, system-ui, sans-serif; }
-  main { max-width: 980px; margin: 0 auto; padding: 24px 16px 48px; }
+  main { max-width: 980px; margin: 0 auto; padding-block: 24px 48px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
   h1 { font-weight: 900; font-size: clamp(26px, 5vw, 38px); margin: 0 0 4px; }
   .sub { color: var(--muted); margin: 0 0 24px; font-weight: 600; }
   .layout { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 20px; }
@@ -33,9 +33,11 @@
     transition: transform .06s, border-color .15s;
   }
   button:hover { border-color: var(--blue); }
+  button:focus-visible { outline: 3px solid var(--blue); outline-offset: 2px; }
   button:active { transform: translateY(3px); border-bottom-width: 2px; margin-bottom: 3px; }
   button[aria-pressed="true"] { border-color: var(--blue); background: color-mix(in srgb, var(--blue) 14%, var(--card)); }
   button small { display: block; font-weight: 600; font-size: 12px; color: var(--muted); }
+  .variants { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin-bottom: 20px; }
   .controls { display: flex; flex-wrap: wrap; gap: 16px; align-items: center; font-weight: 700; color: var(--muted); }
   .controls label { display: flex; gap: 8px; align-items: center; }
   .quiz { margin-top: 20px; }
@@ -49,15 +51,20 @@
 <body>
 <main>
   <h1>Pingu, linh vật chim cánh cụt</h1>
-  <p class="sub">Bấm vào từng nút để xem animation. Dùng được trong mọi web app bằng thẻ <code>&lt;penguin-mascot&gt;</code>.</p>
+  <p class="sub">Chọn phiên bản, rồi bấm vào từng nút để xem animation. Dùng được trong mọi web app bằng thẻ <code>&lt;penguin-mascot&gt;</code>.</p>
 
   <div class="layout">
     <section class="card stage">
       <span class="state-label" id="label">idle</span>
-      <penguin-mascot id="pg" size="260"></penguin-mascot>
+      <penguin-mascot id="pg" size="260" variant="plush"></penguin-mascot>
     </section>
 
     <section class="card">
+      <h2>Phiên bản</h2>
+      <div class="variants" id="variants">
+        <button data-variant="plush" aria-pressed="true">Bông<small>giống thú bông</small></button>
+        <button data-variant="classic" aria-pressed="false">Cổ điển<small>phẳng, kiểu Duolingo</small></button>
+      </div>
       <h2>Lặp liên tục</h2>
       <div class="grid" id="loops"></div>
       <h2>Chạy một lần</h2>
@@ -83,13 +90,14 @@
   <section class="card quiz">
     <h2>Cách dùng</h2>
 <pre><code>&lt;script src="penguin.js"&gt;&lt;/script&gt;
-&lt;penguin-mascot id="pg" size="200" accessory="cap"&gt;&lt;/penguin-mascot&gt;
+&lt;penguin-mascot id="pg" variant="plush" size="200"&gt;&lt;/penguin-mascot&gt;
 
 &lt;script&gt;
   const pg = document.getElementById('pg');
   pg.play('happy');                  // trả lời đúng
   await pg.play('sad');              // chờ animation xong
   pg.setAttribute('state', 'think'); // hoặc đổi bằng thuộc tính
+  pg.variant = 'classic';            // đổi sang bản cổ điển
 &lt;/script&gt;</code></pre>
   </section>
 </main>
@@ -124,6 +132,14 @@
   pg.addEventListener('statechange', (e) => {
     label.textContent = e.detail.state;
     buttons.forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.state === e.detail.state)));
+  });
+
+  document.querySelectorAll('#variants button').forEach((b) => {
+    b.onclick = () => {
+      pg.setAttribute('variant', b.dataset.variant);
+      document.querySelectorAll('#variants button').forEach((x) => x.setAttribute('aria-pressed', String(x === b)));
+      pg.play('wave');
+    };
   });
 
   document.getElementById('cap').onchange = (e) =>
