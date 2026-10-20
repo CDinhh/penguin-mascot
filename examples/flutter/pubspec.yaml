@@ -1,0 +1,25 @@
+name: penguin_mascot_example
+description: Ví dụ dùng penguin_mascot, đủ 15 trạng thái.
+publish_to: none
+version: 1.0.0
+
+environment:
+  sdk: ^3.6.0
+  flutter: ">=3.28.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  penguin_mascot:
+    path: ../../packages/flutter
+
+dev_dependencies:
+  flutter_lints: ^5.0.0
+
+flutter:
+  uses-material-design: true
+  assets:
+    # sprite sheet (đường lùi): npm run export:frames -- --out examples/flutter/assets/mascot
+    - assets/mascot/
+    # file Rive (khi đã có): bỏ comment dòng dưới và đặt rive/bipbip.riv vào assets/mascot/
+    # - assets/mascot/bipbip.riv

@@ -16,3 +16,21 @@ jobs:
       # Ubuntu runner đã có Google Chrome; test tự tìm qua tools/chrome.mjs
       - run: npm ci
       - run: npm test
+
+  flutter:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+      - run: flutter pub get
+        working-directory: packages/flutter
+      - run: flutter analyze
+        working-directory: packages/flutter
+      - run: flutter test
+        working-directory: packages/flutter
+      - run: flutter pub get
+        working-directory: examples/flutter
+      - run: flutter analyze
+        working-directory: examples/flutter
