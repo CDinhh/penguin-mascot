@@ -661,9 +661,7 @@
     '<linearGradient id="' + N + 'beak" x1="0" y1="0" x2="0" y2="1">' +
       '<stop offset="0" stop-color="#F7DE80"/><stop offset=".55" stop-color="#F2D46B"/><stop offset="1" stop-color="#E9C95E"/>' +
     '</linearGradient>' +
-    '<radialGradient id="' + N + 'tag" cx=".38" cy=".3" r=".85">' +
-      '<stop offset="0" stop-color="#CF935A"/><stop offset=".6" stop-color="#B7773F"/><stop offset="1" stop-color="#9C6130"/>' +
-    '</radialGradient>' +
+    '<clipPath id="' + N + 'tagclip"><circle cx="100" cy="163.6" r="15.4"/></clipPath>' +
     '<linearGradient id="' + N + 'beakb" x1="0" y1="0" x2="0" y2="1">' +
       '<stop offset="0" stop-color="#EACB60"/><stop offset="1" stop-color="#E3BE4F"/>' +
     '</linearGradient>';
@@ -733,31 +731,30 @@
         '<g transform="translate(0 4)"><path d="' + tufts + '" fill="#5A6475"/>' +
         strands('M97 29l-4 -10M101 28l1 -11M104 30l5 -9M92 31l-7 -6', '#5A6475', 1.6) + '</g>' +
       '</g>' +
-      // thẻ tên gỗ tròn khắc chìm, treo bằng dây da lộn luồn qua lỗ ở đỉnh; lắc nhẹ quanh lỗ (100 150.5)
-      '<g class="pg-tag">' +
-        '<ellipse cx="102" cy="165.6" rx="16.4" ry="16" fill="#3E4757" opacity=".18"/>' +
-        // dây da lộn: hai nhánh bắt chéo qua lỗ, gập lên dưới cằm
-        '<g fill="none" stroke-linecap="round">' +
-          '<path d="M99.2 151.2 C95.6 147 96.2 142.4 100.6 138.6" stroke="#6E4724" stroke-width="2.7"/>' +
-          '<path d="M100.8 151.2 C104.4 147 103.8 142.4 99.4 138.6" stroke="#6E4724" stroke-width="2.7"/>' +
-          '<path d="M99.2 151.2 C95.6 147 96.2 142.4 100.6 138.6" stroke="#A0703C" stroke-width="1.3"/>' +
-          '<path d="M100.8 151.2 C104.4 147 103.8 142.4 99.4 138.6" stroke="#A0703C" stroke-width="1.3"/>' +
+      // thẻ tên gỗ tròn, mặt mờ (không bóng), khắc chìm; quai da lộn rất ngắn luồn qua lỗ ở đỉnh, thẻ sát cằm; lắc quanh lỗ (100 145.6)
+      '<g class="pg-tag"><g transform="translate(0 -5.6)">' +
+        '<ellipse cx="101.4" cy="165.4" rx="16.3" ry="16" fill="#3E4757" opacity=".15"/>' +
+        '<g fill="none" stroke="#6E4724" stroke-width="2.4" stroke-linecap="round">' +
+          '<path d="M99.3 151.4 C97.3 149.2 97.9 146.6 100.4 145.2"/>' +
+          '<path d="M100.7 151.4 C102.7 149.2 102.1 146.6 99.6 145.2"/>' +
         '</g>' +
         '<circle cx="100" cy="164" r="16.2" fill="#7A4520"/>' +
-        '<circle cx="100" cy="163.6" r="15.4" fill="' + u('tag') + '"/>' +
+        '<circle cx="100" cy="163.6" r="15.4" fill="#B07846"/>' +
+        // vân gỗ rất nhẹ
+        '<g clip-path="' + u('tagclip') + '" fill="none" stroke="#8A5528" stroke-width=".5" opacity=".2">' +
+          '<path d="M82 154 Q100 151.6 118 154.4"/><path d="M82 157.6 Q100 155.6 118 158"/><path d="M82 161.4 Q100 159.8 118 161.8"/>' +
+          '<path d="M82 165.4 Q100 164 118 165.6"/><path d="M82 169.2 Q100 168 118 169.4"/><path d="M82 173 Q100 172 118 173"/>' +
+        '</g>' +
         // vòng viền chìm sát mép
         '<circle cx="100" cy="163.6" r="13.2" fill="none" stroke="#7E4A25" stroke-width=".9" opacity=".85"/>' +
-        '<circle cx="100" cy="164.2" r="13.2" fill="none" stroke="#E1A56B" stroke-width=".6" opacity=".55"/>' +
-        '<path d="M88 154.6 Q100 148.6 112 154.6" fill="none" stroke="#E9B885" stroke-width="1.4" stroke-linecap="round" opacity=".55"/>' +
         '<circle cx="100" cy="151.2" r="1.7" fill="#4A2A12"/>' +
         // họa tiết dấu chân và chữ khắc chìm
         '<g transform="translate(107.4 156.2) rotate(14) scale(.5)">' + TAG_PAW + '</g>' +
         '<g transform="translate(94.6 173.6) rotate(-16) scale(.62)">' + TAG_PAW + '</g>' +
         '<g transform="rotate(-18 100 164.2)" font-family="Brush Script MT, Segoe Script, Georgia, Times New Roman, serif" font-style="italic" font-weight="700" font-size="8" text-anchor="middle">' +
-          '<text x="100.4" y="165.1" fill="#E9B885" opacity=".6">BipBip</text>' +
           '<text x="100" y="164.5" fill="#6A3A1A">BipBip</text>' +
         '</g>' +
-      '</g>' +
+      '</g></g>' +
       '<g transform="translate(100 33) rotate(-6) scale(1.1) translate(-100 -44)">' + P.CAP + '</g>' +
       '<g class="pg-face">' +
         '<g class="pg-brows" fill="none" stroke="' + INK + '" stroke-width="3.2" stroke-linecap="round">' +
@@ -799,7 +796,7 @@
     '.pg-cheek-l{transform-origin:54px 109px}.pg-cheek-r{transform-origin:146px 109px}' +
     '.pg-brow-l{transform-origin:64px 83px}.pg-brow-r{transform-origin:136px 83px}' +
     '.pg-face{transform-origin:100px 100px}' +
-    '.pg-tag{transform-origin:100px 150.5px}';
+    '.pg-tag{transform-origin:100px 145.6px}';
 
   P.registerVariant('plush', {
     label: 'Plush',
