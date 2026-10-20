@@ -28,7 +28,7 @@ Tên cố định: `root`, `body`, `head`, `tag`, `strap`, `wing_l`, `wing_r`, `
 | `root` | gốc | tất cả (nhảy, nghiêng cả người) | 100, 226 |
 | `body` | `root` | `body` | 100, 224 |
 | `head` | `body` | `head`, `cap`, `brow_*`, `eyes_*`, `cheek_*`, `mouth`, `beak_*` | 100, 135 (gợi ý) |
-| `tag`, `strap` | `body` | `tag` (đĩa gỗ tròn, mặt mờ, đường kính khoảng 32 đơn vị, thẻ treo ngay dưới cằm trên bụng) và `strap` (dây da lộn đi vòng sau cổ, **nằm dưới lớp `head`** nên đầu che phần dây đi lên cổ, chỉ ló ra dưới mép cằm; không bao giờ nằm trên mặt hay cằm trắng); cả hai lắc cùng nhịp quanh lỗ treo | 100, 148,2 |
+| `tag`, `strap` | `body` | `tag` (đĩa tròn da giả/vải ép màu nâu caramel, mặt mờ có vân dệt mịn, đường kính khoảng 32 đơn vị, thẻ treo ngay dưới cằm trên bụng) và `strap` (dây da lộn màu xanh ô liu khaki, có vân nhung, đi vòng sau cổ, **nằm dưới lớp `head`** nên đầu che phần dây đi lên cổ, chỉ ló ra dưới mép cằm; không bao giờ nằm trên mặt hay cằm trắng); cả hai lắc cùng nhịp quanh lỗ treo | 100, 148,2 |
 | `eye_l`, `eye_r` | `head` | `eye_l`, `eye_r` (nhìn quanh, chớp mắt) | 64, 94 và 136, 94 |
 | `wing_l`, `wing_r` | `body` | `wing_l`, `wing_r` | 41, 149 và 159, 149 |
 | `foot_l`, `foot_r` | `root` | `foot_l`, `foot_r` | 71, 227 và 129, 227 |

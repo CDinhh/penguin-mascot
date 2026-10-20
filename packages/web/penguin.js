@@ -661,7 +661,24 @@
     '<linearGradient id="' + N + 'beak" x1="0" y1="0" x2="0" y2="1">' +
       '<stop offset="0" stop-color="#F7DE80"/><stop offset=".55" stop-color="#F2D46B"/><stop offset="1" stop-color="#E9C95E"/>' +
     '</linearGradient>' +
-    '<clipPath id="' + N + 'tagclip"><circle cx="100" cy="163.6" r="15.4"/></clipPath>' +
+    // thẻ da giả/vải ép: lưới dệt mịn đều (pattern), lốm đốm nhẹ (noise), mờ
+    '<pattern id="' + N + 'tagweave" width="1.2" height="1.2" patternUnits="userSpaceOnUse">' +
+      '<rect width=".6" height=".6" fill="#FFE2B0" opacity=".11"/><rect x=".6" y=".6" width=".6" height=".6" fill="#FFE2B0" opacity=".11"/>' +
+      '<rect x=".6" width=".6" height=".6" fill="#4F2B10" opacity=".14"/><rect y=".6" width=".6" height=".6" fill="#4F2B10" opacity=".14"/>' +
+    '</pattern>' +
+    '<filter id="' + N + 'tagmot" x="0" y="0" width="100%" height="100%" color-interpolation-filters="sRGB">' +
+      '<feTurbulence type="fractalNoise" baseFrequency=".3" numOctaves="3" seed="7" result="n"/>' +
+      '<feColorMatrix in="n" values="0 0 0 0 .38 0 0 0 0 .2 0 0 0 0 .08 0 0 0 1.5 -.6" result="m"/>' +
+      '<feComposite in="m" in2="SourceGraphic" operator="in"/>' +
+    '</filter>' +
+    // da lộn: nhung mịn, viền hơi xù
+    '<filter id="' + N + 'suede" x="-40%" y="-40%" width="180%" height="180%" color-interpolation-filters="sRGB">' +
+      '<feTurbulence type="fractalNoise" baseFrequency=".95" numOctaves="2" seed="5" result="n"/>' +
+      '<feDisplacementMap in="SourceGraphic" in2="n" scale=".6" xChannelSelector="R" yChannelSelector="G" result="d"/>' +
+      '<feColorMatrix in="n" values="0 0 0 0 .72 0 0 0 0 .5 0 0 0 0 .3 0 0 0 1.3 -.7" result="h"/>' +
+      '<feComposite in="h" in2="d" operator="in" result="h2"/>' +
+      '<feMerge><feMergeNode in="d"/><feMergeNode in="h2"/></feMerge>' +
+    '</filter>' +
     '<linearGradient id="' + N + 'beakb" x1="0" y1="0" x2="0" y2="1">' +
       '<stop offset="0" stop-color="#EACB60"/><stop offset="1" stop-color="#E3BE4F"/>' +
     '</linearGradient>';
@@ -700,7 +717,7 @@
     'M88 32 C83 29 81 24 83 19 C85 24 89 27 94 29 Z M106 30 C110 26 115 24 119 25 C115 27 112 30 111 33 Z';
 
   // Dấu chân thú: một đệm lớn và bốn ngón, vẽ quanh gốc (0 0), dùng khắc chìm lên thẻ
-  var TAG_PAW = '<g fill="#6A3A1A" opacity=".85">' +
+  var TAG_PAW = '<g fill="#7E4E24" opacity=".85">' +
     '<ellipse cx="0" cy="1.6" rx="3" ry="2.4"/>' +
     '<circle cx="-3.6" cy="-1.6" r="1.25"/><circle cx="-1.25" cy="-3.2" r="1.25"/>' +
     '<circle cx="1.25" cy="-3.2" r="1.25"/><circle cx="3.6" cy="-1.6" r="1.25"/></g>';
@@ -716,11 +733,11 @@
         blob(100, 142, 64, 13, 'shade') +
       '</g>' +
       // dây da lộn của thẻ: nằm SAU đầu (đầu che phần dây đi lên cổ), chỉ ló ra dưới mép cằm; cùng nhịp lắc với thẻ
-      '<g class="pg-strap"><g transform="translate(0 -3)" fill="none" stroke-linecap="round">' +
-        '<path d="M99.4 151.4 C99 147.6 97.8 143 97.6 137.6" stroke="#6E4724" stroke-width="2.4"/>' +
-        '<path d="M100.6 151.4 C101 147.6 102.2 143 102.4 137.6" stroke="#6E4724" stroke-width="2.4"/>' +
-        '<path d="M99.4 151.4 C99 147.6 97.8 143 97.6 137.6" stroke="#9A6B3A" stroke-width=".9" opacity=".7"/>' +
-        '<path d="M100.6 151.4 C101 147.6 102.2 143 102.4 137.6" stroke="#9A6B3A" stroke-width=".9" opacity=".7"/>' +
+      '<g class="pg-strap"><g transform="translate(0 -3)" fill="none" stroke-linecap="round" filter="' + u('suede') + '">' +
+        '<path d="M99.4 151.4 C99 147.6 97.8 143 97.6 137.6" stroke="#756538" stroke-width="2.4"/>' +
+        '<path d="M100.6 151.4 C101 147.6 102.2 143 102.4 137.6" stroke="#756538" stroke-width="2.4"/>' +
+        '<path d="M99.4 151.4 C99 147.6 97.8 143 97.6 137.6" stroke="#9C8C58" stroke-width=".7" opacity=".5"/>' +
+        '<path d="M100.6 151.4 C101 147.6 102.2 143 102.4 137.6" stroke="#9C8C58" stroke-width=".7" opacity=".5"/>' +
       '</g></g>' +
       // head
       '<g class="pg-headg" filter="' + u('fuzz') + '">' +
@@ -738,26 +755,23 @@
         '<g transform="translate(0 4)"><path d="' + tufts + '" fill="#5A6475"/>' +
         strands('M97 29l-4 -10M101 28l1 -11M104 30l5 -9M92 31l-7 -6', '#5A6475', 1.6) + '</g>' +
       '</g>' +
-      // thẻ tên gỗ tròn, mặt mờ (không bóng), khắc chìm; thẻ treo ngay dưới cằm; dây da lộn là lớp riêng (pg-strap) nằm sau đầu; lắc quanh lỗ (100 148.2)
+      // thẻ tên tròn da giả/vải ép, mặt mờ (không bóng) có vân dệt, khắc chìm; thẻ treo ngay dưới cằm; dây da lộn là lớp riêng (pg-strap) nằm sau đầu; lắc quanh lỗ (100 148.2)
       '<g class="pg-tag"><g transform="translate(0 -3)">' +
         '<ellipse cx="101.4" cy="165.4" rx="16.3" ry="16" fill="#3E4757" opacity=".15"/>' +
-        '<circle cx="100" cy="164" r="16.2" fill="#7A4520"/>' +
-        '<circle cx="100" cy="163.6" r="15.4" fill="#B07846"/>' +
-        // vân gỗ rất nhẹ
-        '<g clip-path="' + u('tagclip') + '" fill="none" stroke="#8A5528" stroke-width=".5" opacity=".2">' +
-          '<path d="M82 154 Q100 151.6 118 154.4"/><path d="M82 157.6 Q100 155.6 118 158"/><path d="M82 161.4 Q100 159.8 118 161.8"/>' +
-          '<path d="M82 165.4 Q100 164 118 165.6"/><path d="M82 169.2 Q100 168 118 169.4"/><path d="M82 173 Q100 172 118 173"/>' +
-        '</g>' +
+        '<circle cx="100" cy="164" r="16.2" fill="#7A4A24"/>' +
+        '<circle cx="100" cy="163.6" r="15.4" fill="#BA8B48"/>' +
+        '<circle cx="100" cy="163.6" r="15.4" fill="#6A3A1A" filter="' + u('tagmot') + '" opacity=".7"/>' +
+        '<circle cx="100" cy="163.6" r="15.4" fill="' + u('tagweave') + '"/>' +
         // vòng viền chìm sát mép
-        '<circle cx="100" cy="163.6" r="13.2" fill="none" stroke="#7E4A25" stroke-width=".9" opacity=".85"/>' +
+        '<circle cx="100" cy="163.6" r="13.2" fill="none" stroke="#8C5A2C" stroke-width=".9" opacity=".85"/>' +
         '<circle cx="100" cy="151.2" r="1.7" fill="#4A2A12"/>' +
         // đoạn dây đi qua lỗ, vắt lên mép trên của thẻ
-        '<path d="M99.5 151.6 C99.3 150 99.4 148.6 99.8 147.2 M100.5 151.6 C100.7 150 100.6 148.6 100.2 147.2" fill="none" stroke="#6E4724" stroke-width="1.5" stroke-linecap="round"/>' +
+        '<path d="M99.5 151.6 C99.3 150 99.4 148.6 99.8 147.2 M100.5 151.6 C100.7 150 100.6 148.6 100.2 147.2" fill="none" stroke="#756538" stroke-width="1.5" stroke-linecap="round" filter="' + u('suede') + '"/>' +
         // họa tiết dấu chân và chữ khắc chìm
         '<g transform="translate(107.4 156.2) rotate(14) scale(.5)">' + TAG_PAW + '</g>' +
         '<g transform="translate(94.6 173.6) rotate(-16) scale(.62)">' + TAG_PAW + '</g>' +
         '<g transform="rotate(-18 100 164.2)" font-family="Brush Script MT, Segoe Script, Georgia, Times New Roman, serif" font-style="italic" font-weight="700" font-size="8" text-anchor="middle">' +
-          '<text x="100" y="164.5" fill="#6A3A1A">BipBip</text>' +
+          '<text x="100" y="164.5" fill="#7E4E24">BipBip</text>' +
         '</g>' +
       '</g></g>' +
       '<g transform="translate(100 33) rotate(-6) scale(1.1) translate(-100 -44)">' + P.CAP + '</g>' +
