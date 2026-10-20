@@ -5,12 +5,10 @@
 //   node tools/export-frames.mjs --states idle,wave,happy --fps 15 --size 256x320
 //
 // Cần Chrome và Node 22+ (dùng WebSocket có sẵn). Không cần cài thư viện nào.
-import { spawn } from 'node:child_process';
-import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync, existsSync } from 'node:fs';
-import { tmpdir } from 'node:os';
+import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { join, resolve, dirname } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
-import { findChrome, sandboxFlags } from './chrome.mjs';
+import { launch } from './cdp.mjs';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 
@@ -32,47 +30,15 @@ const fps = Number(args.fps || 15);
 const [W, H] = (args.size || '256x320').split('x').map(Number);
 const cols = Number(args.cols || 8);
 const quality = Number(args.quality || 0.8);
-const chrome = findChrome(args.chrome);
-if (!chrome) throw new Error('Không tìm thấy Chrome, truyền --chrome <đường dẫn>.');
+const chrome = args.chrome;
 
 const states = (args.states ? args.states.split(',') : Object.keys(all));
 for (const s of states) if (!all[s]) throw new Error(`Không có animation "${s}". Có: ${Object.keys(all).join(', ')}`);
 
-const port = 9300 + Math.floor(Math.random() * 500);
-const profile = mkdtempSync(join(tmpdir(), 'pg-export-'));
-const proc = spawn(chrome, ['--headless=new', '--disable-gpu', ...sandboxFlags(), '--hide-scrollbars', `--remote-debugging-port=${port}`,
-  `--user-data-dir=${profile}`, 'about:blank'], { stdio: 'ignore' });
-
-const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
-async function getJson(path) {
-  for (let i = 0; i < 100; i++) {
-    try { return await (await fetch(`http://127.0.0.1:${port}${path}`)).json(); } catch { await sleep(100); }
-  }
-  throw new Error('Không kết nối được Chrome');
-}
+const { cdp, evalJs, navigate, close } = await launch({ chrome, width: W, height: H });
 
 try {
-  const targets = await getJson('/json/list');
-  const ws = new WebSocket(targets.find((t) => t.type === 'page').webSocketDebuggerUrl);
-  await new Promise((r, j) => { ws.onopen = r; ws.onerror = j; });
-  let id = 0;
-  const pending = new Map();
-  ws.onmessage = (e) => {
-    const m = JSON.parse(e.data);
-    if (m.id && pending.has(m.id)) { const { res, rej } = pending.get(m.id); pending.delete(m.id); m.error ? rej(new Error(m.error.message)) : res(m.result); }
-  };
-  const cdp = (method, params = {}) => new Promise((res, rej) => { pending.set(++id, { res, rej }); ws.send(JSON.stringify({ id, method, params })); });
-  const evalJs = async (expression) => {
-    const r = await cdp('Runtime.evaluate', { expression, awaitPromise: true, returnByValue: true });
-    if (r.exceptionDetails) throw new Error(r.exceptionDetails.exception?.description || 'Lỗi JS trong trang');
-    return r.result.value;
-  };
-
-  await cdp('Page.enable');
-  await cdp('Emulation.setDeviceMetricsOverride', { width: W, height: H, deviceScaleFactor: 1, mobile: false });
-  await cdp('Emulation.setDefaultBackgroundColorOverride', { color: { r: 0, g: 0, b: 0, a: 0 } });
-  await cdp('Page.navigate', { url: pathToFileURL(join(root, 'tools', 'frame-page.html')).href });
-  await sleep(500);
+  await navigate(pathToFileURL(join(root, 'tools', 'frame-page.html')).href);
   await evalJs(`customElements.whenDefined('penguin-mascot')`);
 
   mkdirSync(out, { recursive: true });
@@ -99,8 +65,6 @@ try {
 
   writeFileSync(join(out, 'manifest.json'), JSON.stringify(manifest, null, 2) + '\n');
   console.log(`Xong: ${out}`);
-  ws.close();
 } finally {
-  proc.kill();
-  try { rmSync(profile, { recursive: true, force: true }); } catch {}
+  close();
 }
