@@ -50,12 +50,12 @@
       "name": "tag",
       "file": "tag.png",
       "x": 83,
-      "y": 136.33,
-      "width": 36.33,
-      "height": 46,
+      "y": 137.67,
+      "width": 35.67,
+      "height": 39,
       "pivot": [
         100,
-        150.5
+        145.6
       ],
       "visibleAtRest": true
     },
