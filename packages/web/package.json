@@ -1,0 +1,10 @@
+{
+  "name": "@prm393/penguin-mascot",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Linh vật BipBip (SVG + CSS animation) dạng Web Component, không phụ thuộc thư viện",
+  "main": "penguin.js",
+  "files": ["penguin.js", "penguin-plush.svg"],
+  "keywords": ["mascot", "penguin", "svg", "animation", "web-component"],
+  "license": "MIT"
+}

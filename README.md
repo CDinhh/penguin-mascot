@@ -8,7 +8,7 @@ Linh vật chim cánh cụt **BipBip** cho app học tập, bản **Bông** (gi�
 
 ## Xem thử
 
-Mở `index.html` bằng trình duyệt (hoặc `npx serve .`). Trang demo có nút cho từng animation, tuỳ chọn đội mũ tốt nghiệp, chỉnh kích thước và một câu hỏi mẫu để thấy linh vật phản ứng khi trả lời đúng/sai.
+Mở `examples/web/index.html` bằng trình duyệt (hoặc `npx serve .`). Trang demo có nút cho từng animation, tuỳ chọn đội mũ tốt nghiệp, chỉnh kích thước và một câu hỏi mẫu để thấy linh vật phản ứng khi trả lời đúng/sai.
 
 ## Các animation (15)
 
@@ -78,18 +78,18 @@ export function Mascot({ state }) {
 
 ## Tuỳ biến
 
-- Hình và màu bản bông nằm ở cuối file `penguin.js`.
-- Muốn thêm phiên bản hình khác: gọi `PenguinMascot.registerVariant('ten', { defs, character, css, fx })`, xem bản bông ở cuối `penguin.js` làm mẫu.
+- Hình và màu bản bông nằm ở cuối file `packages/web/penguin.js`.
+- Muốn thêm phiên bản hình khác: gọi `PenguinMascot.registerVariant('ten', { defs, character, css, fx })`, xem bản bông ở cuối `packages/web/penguin.js` làm mẫu.
 - Tốc độ animation một lần nằm trong `ONE_SHOT` (đơn vị ms), phải khớp với thời lượng trong CSS và với `spec/mascot.json`.
 - Muốn thêm animation mới: thêm tên vào `LOOPING` hoặc `ONE_SHOT` và vào `spec/mascot.json`, rồi thêm các rule `.pg[data-state="ten-moi"] ...` và `@keyframes` trong mảng `CSS`.
 - Người dùng bật “giảm chuyển động” (prefers-reduced-motion) sẽ thấy animation tắt bớt.
 
 ## File
 
-- `penguin.js`: Web Component (SVG + CSS + API), ~28 KB, không phụ thuộc gì
-- `penguin-plush.svg`: hình tĩnh, dùng làm icon, ảnh đại diện
+- `packages/web/penguin.js`: Web Component (SVG + CSS + API), không phụ thuộc gì. `penguin.js` và `penguin-plush.svg` ở thư mục gốc là bản chép (`npm run sync:root`) để link cũ không hỏng
+- `packages/web/penguin-plush.svg`: hình tĩnh, dùng làm icon, ảnh đại diện
 - `spec/mascot.json`: danh sách trạng thái, thời lượng, kiểu lặp (nguồn sự thật; `penguin.js` phải khớp, `npm test` kiểm tra)
-- `index.html`: trang demo
+- `examples/web/index.html`: trang demo (đủ 15 trạng thái)
 - `tools/export-frames.mjs`: xuất sprite sheet cho app native (xem mục trên)
 
 ## Dùng cho app di động / Flutter (sprite sheet)
@@ -116,9 +116,23 @@ export/plush/
 - Animation **lặp** (`loop: true`) được cân lại để khung cuối nối khớp khung đầu; chạy vòng tròn là mượt.
 - Animation **một lần** chạy hết `durationMs` rồi nên quay về `idle` (giống component web).
 - Mỗi khung `frameWidth × frameHeight` ở vị trí `(i % columns, i ~/ columns)`. Phát bằng cách đổi chỉ số khung theo `fps`.
-- Thêm animation mới: thêm vào `penguin.js` như hướng dẫn ở mục Tuỳ biến, rồi khai thời lượng trong `LOOPS` hoặc `ONE_SHOT` ở đầu `tools/export-frames.mjs`.
+- Thêm animation mới: thêm vào `penguin.js` như hướng dẫn ở mục Tuỳ biến, rồi khai trong `spec/mascot.json` và chạy `npm run codegen`; `export-frames` đọc thời lượng từ spec.
 
 Ví dụ Flutter nằm trong repo PRM393_G6_FE (`Mascot` trong `lib/widgets/`). Nếu cần hình vector có thể chỉnh được trong editor, có thể nhập `penguin.svg` vào **Rive** (các bộ phận đã tách lớp sẵn) rồi dựng lại animation theo bảng ở trên.
+
+## Cấu trúc monorepo
+
+```text
+spec/mascot.json     nguồn sự thật: trạng thái, thời lượng, loop, input Rive
+packages/web         web component <penguin-mascot> (@prm393/penguin-mascot, chưa publish)
+packages/react       states.ts sinh từ spec (component React làm ở giai đoạn 4)
+packages/flutter     states.dart sinh từ spec (widget Flutter làm ở giai đoạn 5)
+tools/               codegen, export-frames, ...
+examples/web         trang demo
+docs/PLAN.md         kế hoạch nhiều nền tảng
+```
+
+Lệnh ở thư mục gốc: `npm test`, `npm run codegen` (sinh `states.ts`/`states.dart` từ spec), `npm run sync:root`.
 
 ## Kiểm thử
 
@@ -126,4 +140,4 @@ Ví dụ Flutter nằm trong repo PRM393_G6_FE (`Mascot` trong `lib/widgets/`). 
 npm test
 ```
 
-Dùng `node --test`, cần Node 22+ và Chrome (đặt biến `CHROME` nếu không ở chỗ mặc định). Test kiểm tra spec hợp lệ, trạng thái trong `penguin.js` khớp spec, và thuộc tính `variant` viết sẵn trong HTML được đọc đúng.
+Dùng `node --test`, cần Node 22+ và Chrome (đặt biến `CHROME` nếu không ở chỗ mặc định). Test kiểm tra spec hợp lệ, file sinh ra khớp spec, bản chép ở gốc giống `packages/web`, trạng thái trong `penguin.js` khớp spec, và thuộc tính `variant` viết sẵn trong HTML được đọc đúng.

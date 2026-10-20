@@ -6,7 +6,7 @@ import { createRequire } from 'node:module';
 
 const root = new URL('../', import.meta.url);
 const spec = JSON.parse(readFileSync(new URL('spec/mascot.json', root), 'utf8'));
-const P = createRequire(import.meta.url)('../penguin.js');
+const P = createRequire(import.meta.url)('../packages/web/penguin.js');
 
 test('spec có tên và variant hợp lệ', () => {
   assert.equal(spec.name, 'BipBip');
