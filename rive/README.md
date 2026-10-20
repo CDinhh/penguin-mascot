@@ -28,7 +28,7 @@ Tên cố định: `root`, `body`, `head`, `tag`, `wing_l`, `wing_r`, `foot_l`, 
 | `root` | gốc | tất cả (nhảy, nghiêng cả người) | 100, 226 |
 | `body` | `root` | `body` | 100, 224 |
 | `head` | `body` | `head`, `cap`, `brow_*`, `eyes_*`, `cheek_*`, `mouth`, `beak_*` | 100, 135 (gợi ý) |
-| `tag` | `body` | `tag` (thẻ tên khúc xương treo ở khoen kim loại dưới cằm; lắc quanh khoen) | 100, 143,6 |
+| `tag` | `body` | `tag` (thẻ tên gỗ tròn, đường kính khoảng 32 đơn vị, kèm dây da lộn gập thành quai treo dưới cằm; lắc quanh lỗ ở đỉnh thẻ) | 100, 150,5 |
 | `eye_l`, `eye_r` | `head` | `eye_l`, `eye_r` (nhìn quanh, chớp mắt) | 64, 94 và 136, 94 |
 | `wing_l`, `wing_r` | `body` | `wing_l`, `wing_r` | 41, 149 và 159, 149 |
 | `foot_l`, `foot_r` | `root` | `foot_l`, `foot_r` | 71, 227 và 129, 227 |
@@ -80,7 +80,7 @@ Thời lượng một lần là **mili-giây**, khớp với web component (`ONE
 ## 6. Biểu cảm và hiệu ứng
 
 - Các lớp biểu cảm phụ ẩn mặc định (opacity 0) và được bật trong animation: `eyes_happy` (mắt cười), `eyes_closed` (nhắm mắt, ngủ), `eyes_heart` (mắt tim), `mouth` (miệng mở), `brow_*` (lông mày), `cap` (mũ, tùy chọn). Khi bật `eyes_*` thì ẩn `eye_l`, `eye_r`.
-- Thẻ tên (`tag`, hình khúc xương khắc chữ BipBip, treo ở khoen dưới cằm) lắc nhẹ quanh khoen: `idle` và `talk` xoay khoảng ±7° chu kỳ 2,8 giây; `happy`, `celebrate`, `love`, `yes` xoay khoảng ±14° chu kỳ 0,6 giây (theo bản web). Các trạng thái khác để yên.
+- Thẻ tên (`tag`, đĩa tròn khắc chìm chữ BipBip và dấu chân, dây da lộn đi kèm trong cùng ảnh) lắc nhẹ quanh lỗ treo: `idle` và `talk` xoay khoảng ±7° chu kỳ 2,8 giây; `happy`, `celebrate`, `love`, `yes` xoay khoảng ±14° chu kỳ 0,6 giây (theo bản web). Các trạng thái khác để yên.
 - Hiệu ứng từ `fx/*.svg` là layer riêng, **ẩn mặc định**, chỉ hiện trong animation tương ứng: `flame` (streak), `hearts` (love), `zzz` (sleep), `question` (think), `exclaim` (surprised), `sparkles` (celebrate), `confetti` (celebrate), `tear` (sad), `sweat`.
 - `flame` nằm **sau** nhân vật; các hiệu ứng khác nằm trước.
 

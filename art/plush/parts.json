@@ -49,13 +49,13 @@
     {
       "name": "tag",
       "file": "tag.png",
-      "x": 78.67,
-      "y": 138.33,
-      "width": 44.67,
-      "height": 41,
+      "x": 83,
+      "y": 136.33,
+      "width": 36.33,
+      "height": 46,
       "pivot": [
         100,
-        143.6
+        150.5
       ],
       "visibleAtRest": true
     },
