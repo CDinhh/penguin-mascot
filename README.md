@@ -1,18 +1,14 @@
 # 🐧 Penguin Mascot
 
-Linh vật chim cánh cụt cho app học tập, có 2 phiên bản: **Bông** (giống thú bông lông xám) và **Cổ điển** (phẳng, kiểu Duolingo). Vẽ hoàn toàn bằng SVG, animation bằng CSS, đóng gói thành Web Component `<penguin-mascot>` nên dùng được trong HTML thuần, React, Vue, Svelte, Angular… mà không cần thư viện nào.
+Linh vật chim cánh cụt **BipBip** cho app học tập, bản **Bông** (giống thú bông lông xám). Vẽ hoàn toàn bằng SVG, animation bằng CSS, đóng gói thành Web Component `<penguin-mascot>` nên dùng được trong HTML thuần, React, Vue, Svelte, Angular… mà không cần thư viện nào.
 
-| Bông (`variant="plush"`) | Cổ điển (mặc định) |
-|---|---|
-| ![Plush](penguin-plush.svg) | ![Classic](penguin.svg) |
+![BipBip bản bông](penguin-plush.svg)
 
 ![15 animation, bản bông](preview-plush-animations.png)
 
-![15 animation, bản cổ điển](preview-15-animations.png)
-
 ## Xem thử
 
-Mở `index.html` bằng trình duyệt (hoặc `npx serve .`). Trang demo có nút chọn phiên bản, nút cho từng animation, tuỳ chọn đội mũ tốt nghiệp, chỉnh kích thước và một câu hỏi mẫu để thấy linh vật phản ứng khi trả lời đúng/sai.
+Mở `index.html` bằng trình duyệt (hoặc `npx serve .`). Trang demo có nút cho từng animation, tuỳ chọn đội mũ tốt nghiệp, chỉnh kích thước và một câu hỏi mẫu để thấy linh vật phản ứng khi trả lời đúng/sai.
 
 ## Các animation (15)
 
@@ -56,7 +52,7 @@ Animation **một lần** chạy xong sẽ tự quay về animation **lặp** g�
 
 | Thuộc tính | Ví dụ | Ý nghĩa |
 |---|---|---|
-| `variant` | `variant="plush"` | Phiên bản hình: `plush` (bông) hoặc `classic` (mặc định) |
+| `variant` | `variant="plush"` | Phiên bản hình, hiện chỉ có `plush` (mặc định; tên lạ cũng dùng `plush`) |
 | `state` | `state="dance"` | Animation đang chạy |
 | `size` | `size="160"` hoặc `size="10rem"` | Chiều rộng (mặc định 200px) |
 | `accessory` | `accessory="cap"` | Đội mũ tốt nghiệp |
@@ -82,16 +78,17 @@ export function Mascot({ state }) {
 
 ## Tuỳ biến
 
-- Màu bản cổ điển nằm trong object `COLORS` đầu file `penguin.js`; bản bông nằm ở cuối file.
+- Hình và màu bản bông nằm ở cuối file `penguin.js`.
 - Muốn thêm phiên bản hình khác: gọi `PenguinMascot.registerVariant('ten', { defs, character, css, fx })`, xem bản bông ở cuối `penguin.js` làm mẫu.
-- Tốc độ animation một lần nằm trong `ONE_SHOT` (đơn vị ms), phải khớp với thời lượng trong CSS.
-- Muốn thêm animation mới: thêm tên vào `LOOPING` hoặc `ONE_SHOT`, rồi thêm các rule `.pg[data-state="ten-moi"] ...` và `@keyframes` trong mảng `CSS`.
+- Tốc độ animation một lần nằm trong `ONE_SHOT` (đơn vị ms), phải khớp với thời lượng trong CSS và với `spec/mascot.json`.
+- Muốn thêm animation mới: thêm tên vào `LOOPING` hoặc `ONE_SHOT` và vào `spec/mascot.json`, rồi thêm các rule `.pg[data-state="ten-moi"] ...` và `@keyframes` trong mảng `CSS`.
 - Người dùng bật “giảm chuyển động” (prefers-reduced-motion) sẽ thấy animation tắt bớt.
 
 ## File
 
 - `penguin.js`: Web Component (SVG + CSS + API), ~28 KB, không phụ thuộc gì
-- `penguin-plush.svg`, `penguin.svg`: hình tĩnh của 2 phiên bản, dùng làm icon, ảnh đại diện
+- `penguin-plush.svg`: hình tĩnh, dùng làm icon, ảnh đại diện
+- `spec/mascot.json`: danh sách trạng thái, thời lượng, kiểu lặp (nguồn sự thật; `penguin.js` phải khớp, `npm test` kiểm tra)
 - `index.html`: trang demo
 - `tools/export-frames.mjs`: xuất sprite sheet cho app native (xem mục trên)
 
@@ -104,7 +101,7 @@ npm run export:frames -- --variant plush --out export/plush
 npm run export:frames -- --states idle,wave,happy,sad --fps 15 --out ../app/assets/mascot
 ```
 
-Cần Chrome và Node 22+, không cần cài thư viện. Tuỳ chọn: `--variant` (plush|classic), `--states` (mặc định tất cả 15), `--fps` (15), `--size` (256x320, kích thước một khung), `--cols` (8, số khung mỗi hàng), `--quality` (0.8), `--chrome` (đường dẫn Chrome nếu không ở chỗ mặc định).
+Cần Chrome và Node 22+, không cần cài thư viện. Tuỳ chọn: `--variant` (plush), `--states` (mặc định tất cả 15), `--fps` (15), `--size` (256x320, kích thước một khung), `--cols` (8, số khung mỗi hàng), `--quality` (0.8), `--chrome` (đường dẫn Chrome nếu không ở chỗ mặc định).
 
 Kết quả:
 
@@ -122,3 +119,11 @@ export/plush/
 - Thêm animation mới: thêm vào `penguin.js` như hướng dẫn ở mục Tuỳ biến, rồi khai thời lượng trong `LOOPS` hoặc `ONE_SHOT` ở đầu `tools/export-frames.mjs`.
 
 Ví dụ Flutter nằm trong repo PRM393_G6_FE (`Mascot` trong `lib/widgets/`). Nếu cần hình vector có thể chỉnh được trong editor, có thể nhập `penguin.svg` vào **Rive** (các bộ phận đã tách lớp sẵn) rồi dựng lại animation theo bảng ở trên.
+
+## Kiểm thử
+
+```bash
+npm test
+```
+
+Dùng `node --test`, cần Node 22+ và Chrome (đặt biến `CHROME` nếu không ở chỗ mặc định). Test kiểm tra spec hợp lệ, trạng thái trong `penguin.js` khớp spec, và thuộc tính `variant` viết sẵn trong HTML được đọc đúng.

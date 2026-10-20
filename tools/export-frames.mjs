@@ -6,12 +6,18 @@
 //
 // Cần Chrome và Node 22+ (dùng WebSocket có sẵn). Không cần cài thư viện nào.
 import { spawn } from 'node:child_process';
-import { mkdirSync, mkdtempSync, rmSync, writeFileSync, existsSync } from 'node:fs';
+import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync, existsSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join, resolve, dirname } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
+import { findChrome, sandboxFlags } from './chrome.mjs';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
+
+// Trạng thái, thời lượng và kiểu lặp lấy từ spec/mascot.json (nguồn sự thật duy nhất). Trạng thái lặp là một chu kỳ
+// đủ dài để mọi chuyển động (thở, chớp mắt, vẫy cánh) lặp nguyên số lần và khớp đuôi với đầu.
+const spec = JSON.parse(readFileSync(join(root, 'spec', 'mascot.json'), 'utf8'));
+const all = Object.fromEntries(Object.entries(spec.states).map(([k, v]) => [k, { ms: v.durationMs, loop: v.loop }]));
 
 const args = Object.fromEntries(
   process.argv.slice(2).reduce((acc, a, i, all) => {
@@ -20,33 +26,21 @@ const args = Object.fromEntries(
   }, []),
 );
 
-const variant = args.variant || 'plush';
+const variant = args.variant || spec.defaultVariant;
 const out = resolve(args.out || join(root, 'export', variant));
 const fps = Number(args.fps || 15);
 const [W, H] = (args.size || '256x320').split('x').map(Number);
 const cols = Number(args.cols || 8);
 const quality = Number(args.quality || 0.8);
-const chrome = args.chrome || [
-  'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe',
-  'C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe',
-  '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',
-  '/usr/bin/google-chrome',
-  '/usr/bin/chromium',
-].find((p) => existsSync(p));
+const chrome = findChrome(args.chrome);
 if (!chrome) throw new Error('Không tìm thấy Chrome, truyền --chrome <đường dẫn>.');
 
-// Độ dài (ms) của mỗi animation. Trạng thái một lần lấy từ penguin.js; trạng thái lặp là một chu kỳ
-// đủ dài để mọi chuyển động (thở, chớp mắt, vẫy cánh) lặp nguyên số lần và khớp đuôi với đầu.
-const LOOPS = { idle: 2800, think: 3000, sleep: 3000, dance: 1600, walk: 1800, talk: 640 };
-const ONE_SHOT = { wave: 2000, happy: 1200, celebrate: 2600, sad: 2600, surprised: 1400, no: 1200, yes: 1200, love: 2400, streak: 2400 };
-const all = { ...Object.fromEntries(Object.entries(LOOPS).map(([k, v]) => [k, { ms: v, loop: true }])),
-  ...Object.fromEntries(Object.entries(ONE_SHOT).map(([k, v]) => [k, { ms: v, loop: false }])) };
 const states = (args.states ? args.states.split(',') : Object.keys(all));
 for (const s of states) if (!all[s]) throw new Error(`Không có animation "${s}". Có: ${Object.keys(all).join(', ')}`);
 
 const port = 9300 + Math.floor(Math.random() * 500);
 const profile = mkdtempSync(join(tmpdir(), 'pg-export-'));
-const proc = spawn(chrome, ['--headless=new', '--disable-gpu', '--hide-scrollbars', `--remote-debugging-port=${port}`,
+const proc = spawn(chrome, ['--headless=new', '--disable-gpu', ...sandboxFlags(), '--hide-scrollbars', `--remote-debugging-port=${port}`,
   `--user-data-dir=${profile}`, 'about:blank'], { stdio: 'ignore' });
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));

@@ -4,6 +4,16 @@ Tài liệu này để giao cho người hoặc AI agent thực hiện. Làm the
 đoạn, mỗi giai đoạn là một PR riêng, đạt đủ "Tiêu chí xong" mới sang giai đoạn
 sau. Phần nào cần con người (dựng animation trong Rive editor) được ghi rõ.
 
+**Quyết định đã chốt** (cập nhật sau khi nhóm trả lời mục 8):
+
+- Tên chính thức là **BipBip** (`"name": "BipBip"` trong spec).
+- **Chỉ giữ bản `plush`.** Bản `classic` đã bị bỏ ở Giai đoạn 0 (code, `penguin.svg`, ảnh preview). Spec chỉ có
+  `variants: ["plush"]`, `defaultVariant: "plush"`. Mọi giai đoạn sau chỉ làm `plush`: không có artboard, ảnh
+  bộ phận hay ví dụ cho `classic`.
+- Nâng Dart của app PRM393 lên `>=3.6.0` để dùng `rive` 0.14 (người dùng tự nâng ở repo app).
+- Người dùng tự dựng `bipbip.riv`; agent viết hướng dẫn từng bước trong `rive/README.md`.
+- Không publish npm/pub.dev: chỉ phát hành bằng git tag.
+
 ## 1. Mục tiêu
 
 - Một nguồn sự thật cho nhân vật: hình, danh sách trạng thái, thời lượng,
@@ -17,15 +27,15 @@ sau. Phần nào cần con người (dựng animation trong Rive editor) đượ
 
 ## 2. Không làm trong plan này
 
-- Không vẽ lại nhân vật hay đổi thiết kế bản `plush` và `classic`.
+- Không vẽ lại nhân vật hay đổi thiết kế bản `plush`.
 - Không bỏ web component `<penguin-mascot>` hiện tại; nó vẫn là bản Web zero-dependency.
 - Không phát hành lên npm hoặc pub.dev công khai khi chưa được nhóm đồng ý (xem mục 8).
 
 ## 3. Hiện trạng (đã kiểm tra)
 
 - `penguin.js` (khoảng 710 dòng): web component, SVG dựng bằng JS, animation bằng CSS.
-  Có 2 variant: `classic` (vector phẳng) và `plush` (lông bông, dựng thủ tục bằng
-  nhiều nét vẽ ngẫu nhiên có seed, cộng filter `feTurbulence`/`feDisplacementMap`).
+  Chỉ còn variant `plush` (lông bông, dựng thủ tục bằng nhiều nét vẽ ngẫu nhiên có seed, cộng filter
+  `feTurbulence`/`feDisplacementMap`). Bản `classic` đã bỏ.
 - Các bộ phận đã tách lớp với class `pg-*`: `pg-body`, `pg-belly`, `pg-face`,
   `pg-wing-l/r`, `pg-foot-l/r`, `pg-pupil`, `pg-beak-top/bot`, `pg-brows`,
   `pg-eyes-happy/closed/heart`, `pg-mouth`, `pg-cap`, hiệu ứng (`pg-confetti`,
@@ -35,7 +45,7 @@ sau. Phần nào cần con người (dựng animation trong Rive editor) đượ
 - `tools/export-frames.mjs`: xuất sprite sheet WebP + `manifest.json` qua Chrome.
   Đang được app PRM393_G6_FE (Flutter) dùng, khoảng 3MB cho 9 dáng, khoảng 15MB
   RAM cho mỗi sheet khi giải mã. Chạy được nhưng nặng.
-- **Lỗi đã biết:** thuộc tính `variant` ghi sẵn trong HTML bị bỏ qua. Constructor
+- **Lỗi đã biết (đã sửa ở Giai đoạn 0):** thuộc tính `variant` ghi sẵn trong HTML bị bỏ qua. Constructor
   gọi `_render()` trước khi parser gán thuộc tính, còn `attributeChangedCallback`
   bỏ qua khi chưa `isConnected`.
 - Danh sách trạng thái và thời lượng đang bị chép ở 2 nơi: `penguin.js` và
@@ -48,7 +58,6 @@ penguin-mascot/
 ├── spec/
 │   └── mascot.json            # NGUỒN SỰ THẬT: trạng thái, thời lượng, loop, input Rive
 ├── art/
-│   ├── classic/               # SVG nguồn từng bộ phận (vector)
 │   └── plush/                 # PNG từng bộ phận đã nướng sẵn lông (raster) + parts.json
 ├── rive/
 │   ├── bipbip.riv             # file chạy (con người dựng trong Rive editor)
@@ -84,7 +93,7 @@ Mọi package và mọi tool đọc từ file này. Ví dụ:
 ```json
 {
   "name": "BipBip",
-  "variants": ["plush", "classic"],
+  "variants": ["plush"],
   "defaultVariant": "plush",
   "states": {
     "idle":      { "loop": true,  "durationMs": 2800, "riveInput": { "type": "number", "name": "mood", "value": 0 } },
@@ -94,7 +103,7 @@ Mọi package và mọi tool đọc từ file này. Ví dụ:
   },
   "rive": {
     "file": "rive/bipbip.riv",
-    "artboards": { "plush": "BipBip Plush", "classic": "BipBip Classic" },
+    "artboards": { "plush": "BipBip Plush" },
     "stateMachine": "Main",
     "doneEvent": "done",
     "extraInputs": [
@@ -148,7 +157,7 @@ cách dùng; `<penguin-mascot variant="plush">` viết trong HTML hiện đúng 
 
 ### Giai đoạn 1: chuyển sang monorepo (agent tự làm)
 
-1. Chuyển `penguin.js`, `penguin.svg`, `penguin-plush.svg` vào `packages/web/`;
+1. Chuyển `penguin.js`, `penguin-plush.svg` vào `packages/web/`;
    giữ file `penguin.js` ở thư mục gốc (copy lúc build hoặc file re-export) để
    link cũ không hỏng.
 2. npm workspaces ở `package.json` gốc. Đặt tên package dạng scope, ví dụ
@@ -157,28 +166,27 @@ cách dùng; `<penguin-mascot variant="plush">` viết trong HTML hiện đúng 
 4. `examples/web/` (là `index.html` hiện tại).
 
 **Tiêu chí xong:** `npm test` và `npm run codegen` chạy được từ thư mục gốc;
-`examples/web` mở được, đủ 15 trạng thái và 2 variant.
+`examples/web` mở được, đủ 15 trạng thái (variant `plush`).
 
 ### Giai đoạn 2: chuẩn bị cho Rive (agent tự làm)
 
 1. `tools/export-layers.mjs`: dùng cách dựng trang và CDP giống `export-frames.mjs`,
    ẩn hết bộ phận rồi bật từng bộ phận một để chụp.
-   - `classic`: xuất SVG từng bộ phận (`art/classic/*.svg`), vì Rive nhập SVG được.
-   - `plush`: xuất PNG trong suốt từng bộ phận ở 3x (`art/plush/*.png`), lông đã
+   - Chỉ `plush` (đã bỏ `classic`): xuất PNG trong suốt từng bộ phận ở 3x (`art/plush/*.png`), lông đã
      được nướng sẵn, vì Rive không có filter `feTurbulence`. Viền lông có thể
      tràn ra ngoài khung bộ phận, chừa lề khi chụp.
    - `parts.json`: tên bộ phận, khung bao, gợi ý điểm xoay (pivot) cho cánh
      (gốc vai), chân, đầu, mắt.
 2. `rive/README.md`: hợp đồng rig cho người dựng:
-   - Artboard: `BipBip Plush` và `BipBip Classic`, cùng kích thước 200x240 và cùng gốc tọa độ.
+   - Artboard: `BipBip Plush`, kích thước 200x240.
    - Bone: `root, body, head, wing_l, wing_r, foot_l, foot_r, eye_l, eye_r`.
    - State machine `Main`: input số `mood`, trigger theo spec, input số `lookX`, `lookY`.
    - Mỗi trigger chạy animation một lần rồi về layer `mood`, phát event `done`.
    - Hiệu ứng (pháo giấy, tim, Zzz, nước mắt, lửa) là layer riêng, ẩn mặc định.
-   - Ngân sách: file `.riv` dưới 600KB cho bản plush (raster), dưới 100KB cho classic.
+   - Ngân sách: file `.riv` dưới 600KB (plush là raster).
    - Bảng trạng thái (copy từ README chính) để người dựng bám theo nhịp và thời lượng.
 
-**Tiêu chí xong:** chạy `node tools/export-layers.mjs` ra đủ bộ phận cho 2 variant;
+**Tiêu chí xong:** chạy `node tools/export-layers.mjs` ra đủ bộ phận cho `plush`;
 ghép các PNG lại theo `parts.json` trùng với ảnh `penguin-plush.svg` (agent tự kiểm
 tra bằng cách dựng lại một trang ghép và so ảnh).
 
@@ -186,7 +194,7 @@ tra bằng cách dựng lại một trang ghép và so ảnh).
 
 Agent không làm được bước này: file `.riv` chỉ tạo được trong Rive editor.
 
-1. Nhập `art/plush/*.png` và `art/classic/*.svg`, rig theo `rive/README.md`.
+1. Nhập `art/plush/*.png`, rig theo `rive/README.md`.
 2. Dựng ít nhất 9 trạng thái app đang dùng: `idle, wave, happy, sad, think,
    celebrate, sleep, surprised, love`. Còn lại làm sau.
 3. Xuất `rive/bipbip.riv`.
@@ -251,9 +259,11 @@ chạy đúng `wave` và `sad`; kích thước asset giảm từ khoảng 3MB xu
 | Lông bản plush làm bằng filter; Rive không có filter đó | Nướng lông vào PNG từng bộ phận rồi rig bằng bone/mesh. Viền lông có thể lộ đường nối ở khớp: chồng lớp và chừa lề. |
 | Package `rive` cho Flutter: bản mới nhất 0.14 (runtime `rive_native`, nhanh nhất) cần **Dart ≥ 3.6**; app PRM393 đang khóa Dart `>=2.17.0 <3.0.0` | Xem quyết định ở mục 8. Bản `rive` 0.13.x chạy với Dart 2.17 nhưng là runtime cũ. |
 | Cần người dựng animation trong Rive editor | Giai đoạn 0 đến 2 làm trước, không phụ thuộc; app tiếp tục dùng sprite sheet cho tới giai đoạn 6. |
-| Hai variant làm gấp đôi công dựng | Ưu tiên `plush` (app đang dùng); `classic` làm sau. |
+| Hai variant làm gấp đôi công dựng | Đã chốt: bỏ `classic`, chỉ làm `plush`. |
 
-## 8. Quyết định cần nhóm chốt trước khi làm
+## 8. Quyết định (đã chốt)
+
+Cả bốn mục dưới đây đã được chốt, xem đầu tài liệu. Giữ lại để biết lý do.
 
 1. **Dart 3 cho app PRM393:** nâng `environment.sdk` lên `>=3.6.0` để dùng `rive`
    0.14 (khuyến nghị; Flutter SDK trên máy đã là 3.47), hay giữ Dart 2.17 và dùng
