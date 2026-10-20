@@ -47,6 +47,32 @@
       "visibleAtRest": true
     },
     {
+      "name": "collar",
+      "file": "collar.png",
+      "x": 56.33,
+      "y": 127.33,
+      "width": 87.33,
+      "height": 23,
+      "pivot": [
+        100,
+        136
+      ],
+      "visibleAtRest": true
+    },
+    {
+      "name": "tag",
+      "file": "tag.png",
+      "x": 85.33,
+      "y": 142.67,
+      "width": 32,
+      "height": 37.67,
+      "pivot": [
+        100,
+        147
+      ],
+      "visibleAtRest": true
+    },
+    {
       "name": "cap",
       "file": "cap.png",
       "x": 51,
