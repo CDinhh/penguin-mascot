@@ -661,6 +661,9 @@
     '<linearGradient id="' + N + 'beak" x1="0" y1="0" x2="0" y2="1">' +
       '<stop offset="0" stop-color="#F7DE80"/><stop offset=".55" stop-color="#F2D46B"/><stop offset="1" stop-color="#E9C95E"/>' +
     '</linearGradient>' +
+    '<radialGradient id="' + N + 'tag" cx=".38" cy=".3" r=".85">' +
+      '<stop offset="0" stop-color="#CF935A"/><stop offset=".6" stop-color="#B7773F"/><stop offset="1" stop-color="#9C6130"/>' +
+    '</radialGradient>' +
     '<linearGradient id="' + N + 'beakb" x1="0" y1="0" x2="0" y2="1">' +
       '<stop offset="0" stop-color="#EACB60"/><stop offset="1" stop-color="#E3BE4F"/>' +
     '</linearGradient>';
@@ -698,6 +701,12 @@
   var tufts = 'M95 30 C90 24 90 17 95 13 C95 19 98 24 101 28 Z M100 28 C100 21 103 15 110 14 C106 19 105 24 107 30 Z' +
     'M88 32 C83 29 81 24 83 19 C85 24 89 27 94 29 Z M106 30 C110 26 115 24 119 25 C115 27 112 30 111 33 Z';
 
+  // Dấu chân thú: một đệm lớn và bốn ngón, vẽ quanh gốc (0 0), dùng khắc chìm lên thẻ
+  var TAG_PAW = '<g fill="#6A3A1A" opacity=".85">' +
+    '<ellipse cx="0" cy="1.6" rx="3" ry="2.4"/>' +
+    '<circle cx="-3.6" cy="-1.6" r="1.25"/><circle cx="-1.25" cy="-3.2" r="1.25"/>' +
+    '<circle cx="1.25" cy="-3.2" r="1.25"/><circle cx="3.6" cy="-1.6" r="1.25"/></g>';
+
   var character =
     '<g class="pg-bodyg">' +
       // body
@@ -724,22 +733,29 @@
         '<g transform="translate(0 4)"><path d="' + tufts + '" fill="#5A6475"/>' +
         strands('M97 29l-4 -10M101 28l1 -11M104 30l5 -9M92 31l-7 -6', '#5A6475', 1.6) + '</g>' +
       '</g>' +
-      // vòng cổ da nâu + thẻ khắc tên; thẻ lắc nhẹ quanh móc ở (100 146)
-      '<g class="pg-collar">' +
-        '<path d="M62 133 Q100 156 138 133" fill="none" stroke="#6E4524" stroke-width="10" stroke-linecap="round"/>' +
-        '<path d="M62 132 Q100 154 138 132" fill="none" stroke="#9A6234" stroke-width="7" stroke-linecap="round"/>' +
-        '<path d="M64 130.6 Q100 151.4 136 130.6" fill="none" stroke="#B9824E" stroke-width="1.6" stroke-linecap="round" opacity=".7"/>' +
-        '<path d="M66 134 Q100 157 134 134" fill="none" stroke="#5A371B" stroke-width="1.2" stroke-dasharray="3 3.2" stroke-linecap="round" opacity=".75"/>' +
-      '</g>' +
+      // thẻ tên gỗ tròn khắc chìm, treo bằng dây da lộn luồn qua lỗ ở đỉnh; lắc nhẹ quanh lỗ (100 150.5)
       '<g class="pg-tag">' +
-        '<ellipse cx="102.5" cy="166" rx="14" ry="13.5" fill="#3E4757" opacity=".18"/>' +
-        '<circle cx="100" cy="147.5" r="3.2" fill="none" stroke="#C9CED6" stroke-width="1.8"/>' +
-        '<circle cx="100" cy="163" r="14" fill="#7A4B25"/>' +
-        '<circle cx="100" cy="162.6" r="12.4" fill="#D9A25F"/>' +
-        '<path d="M89 157 Q100 150 111 157" fill="none" stroke="#F2CD94" stroke-width="1.6" stroke-linecap="round" opacity=".8"/>' +
-        '<g font-family="Arial Rounded MT Bold, Arial, sans-serif" font-weight="900" font-size="6.6" text-anchor="middle">' +
-          '<text x="100" y="166.6" fill="#F6DDB5" opacity=".85">BipBip</text>' +
-          '<text x="100" y="165.6" fill="#5A3417">BipBip</text>' +
+        '<ellipse cx="102" cy="165.6" rx="16.4" ry="16" fill="#3E4757" opacity=".18"/>' +
+        // dây da lộn: hai nhánh bắt chéo qua lỗ, gập lên dưới cằm
+        '<g fill="none" stroke-linecap="round">' +
+          '<path d="M99.2 151.2 C95.6 147 96.2 142.4 100.6 138.6" stroke="#6E4724" stroke-width="2.7"/>' +
+          '<path d="M100.8 151.2 C104.4 147 103.8 142.4 99.4 138.6" stroke="#6E4724" stroke-width="2.7"/>' +
+          '<path d="M99.2 151.2 C95.6 147 96.2 142.4 100.6 138.6" stroke="#A0703C" stroke-width="1.3"/>' +
+          '<path d="M100.8 151.2 C104.4 147 103.8 142.4 99.4 138.6" stroke="#A0703C" stroke-width="1.3"/>' +
+        '</g>' +
+        '<circle cx="100" cy="164" r="16.2" fill="#7A4520"/>' +
+        '<circle cx="100" cy="163.6" r="15.4" fill="' + u('tag') + '"/>' +
+        // vòng viền chìm sát mép
+        '<circle cx="100" cy="163.6" r="13.2" fill="none" stroke="#7E4A25" stroke-width=".9" opacity=".85"/>' +
+        '<circle cx="100" cy="164.2" r="13.2" fill="none" stroke="#E1A56B" stroke-width=".6" opacity=".55"/>' +
+        '<path d="M88 154.6 Q100 148.6 112 154.6" fill="none" stroke="#E9B885" stroke-width="1.4" stroke-linecap="round" opacity=".55"/>' +
+        '<circle cx="100" cy="151.2" r="1.7" fill="#4A2A12"/>' +
+        // họa tiết dấu chân và chữ khắc chìm
+        '<g transform="translate(107.4 156.2) rotate(14) scale(.5)">' + TAG_PAW + '</g>' +
+        '<g transform="translate(94.6 173.6) rotate(-16) scale(.62)">' + TAG_PAW + '</g>' +
+        '<g transform="rotate(-18 100 164.2)" font-family="Brush Script MT, Segoe Script, Georgia, Times New Roman, serif" font-style="italic" font-weight="700" font-size="8" text-anchor="middle">' +
+          '<text x="100.4" y="165.1" fill="#E9B885" opacity=".6">BipBip</text>' +
+          '<text x="100" y="164.5" fill="#6A3A1A">BipBip</text>' +
         '</g>' +
       '</g>' +
       '<g transform="translate(100 33) rotate(-6) scale(1.1) translate(-100 -44)">' + P.CAP + '</g>' +
@@ -783,7 +799,7 @@
     '.pg-cheek-l{transform-origin:54px 109px}.pg-cheek-r{transform-origin:146px 109px}' +
     '.pg-brow-l{transform-origin:64px 83px}.pg-brow-r{transform-origin:136px 83px}' +
     '.pg-face{transform-origin:100px 100px}' +
-    '.pg-tag{transform-origin:100px 147px}';
+    '.pg-tag{transform-origin:100px 150.5px}';
 
   P.registerVariant('plush', {
     label: 'Plush',
