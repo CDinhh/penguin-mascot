@@ -4,7 +4,9 @@
   "version": "1.0.0",
   "description": "BipBip, linh vật chim cánh cụt cho app học tập (monorepo: web, React, Flutter)",
   "workspaces": [
-    "packages/*"
+    "packages/*",
+    "examples/react",
+    "examples/web-rive"
   ],
   "scripts": {
     "test": "node --test \"test/*.test.mjs\"",

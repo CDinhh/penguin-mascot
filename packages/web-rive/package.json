@@ -1,0 +1,13 @@
+{
+  "name": "@prm393/penguin-mascot-rive",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Renderer Rive cho <penguin-mascot>: thêm renderer=\"rive\", tự lùi về SVG khi không nạp được .riv",
+  "main": "src/index.js",
+  "exports": { ".": "./src/index.js", "./driver": "./src/driver.js" },
+  "files": ["src"],
+  "dependencies": { "@rive-app/canvas": "2.45.0" },
+  "peerDependencies": { "@prm393/penguin-mascot": "1.0.0" },
+  "license": "MIT"
+}

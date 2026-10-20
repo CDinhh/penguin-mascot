@@ -93,12 +93,22 @@ const String kRiveDoneEvent = '${spec.rive.doneEvent}';
 `;
 }
 
+function js(spec) {
+  const { name, defaultVariant, states, rive } = spec;
+  return `// ${HEADER}
+
+/** Phần của spec mà runtime Rive cần. */
+export const SPEC = ${JSON.stringify({ name, defaultVariant, states, rive }, null, 2)};
+`;
+}
+
 /** Trả về { đường dẫn tương đối: nội dung } */
 export function generate() {
   const spec = JSON.parse(readFileSync(join(root, 'spec', 'mascot.json'), 'utf8'));
   return {
     'packages/react/src/states.ts': ts(spec),
     'packages/flutter/lib/src/states.dart': dart(spec),
+    'packages/web-rive/src/spec.generated.js': js(spec),
   };
 }
 

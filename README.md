@@ -129,12 +129,15 @@ Ví dụ Flutter nằm trong repo PRM393_G6_FE (`Mascot` trong `lib/widgets/`). 
 ```text
 spec/mascot.json     nguồn sự thật: trạng thái, thời lượng, loop, input Rive
 packages/web         web component <penguin-mascot> (@prm393/penguin-mascot, chưa publish)
-packages/react       states.ts sinh từ spec (component React làm ở giai đoạn 4)
+packages/web-rive    renderer="rive" cho web component (có đường lùi về SVG)
+packages/react       component <PenguinMascot> (Rive, lùi về web component)
 packages/flutter     states.dart sinh từ spec (widget Flutter làm ở giai đoạn 5)
 art/plush            bộ phận PNG + fx SVG để nhập vào Rive (export-layers)
 rive/README.md       hợp đồng rig và hướng dẫn dựng bipbip.riv
 tools/               codegen, export-frames, export-layers, ...
-examples/web         trang demo
+examples/web         trang demo (SVG)
+examples/web-rive    demo renderer="rive" (Vite)
+examples/react       demo React (Vite)
 docs/PLAN.md         kế hoạch nhiều nền tảng
 ```
 
