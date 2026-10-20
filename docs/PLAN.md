@@ -38,7 +38,7 @@ sau. Phần nào cần con người (dựng animation trong Rive editor) đượ
   `feTurbulence`/`feDisplacementMap`). Bản `classic` đã bỏ.
 - Các bộ phận đã tách lớp với class `pg-*`: `pg-body`, `pg-belly`, `pg-face`,
   `pg-wing-l/r`, `pg-foot-l/r`, `pg-pupil`, `pg-beak-top/bot`, `pg-brows`,
-  `pg-eyes-happy/closed/heart`, `pg-mouth`, `pg-cap`, `pg-collar`, `pg-tag` (vòng cổ nâu và thẻ tên, luôn hiện; thẻ lắc), hiệu ứng (`pg-confetti`,
+  `pg-eyes-happy/closed/heart`, `pg-mouth`, `pg-cap`, `pg-tag` (thẻ tên khúc xương ở cổ, luôn hiện; lắc), hiệu ứng (`pg-confetti`,
   `pg-heart`, `pg-z`, `pg-tear`, `pg-flame`...).
 - 15 trạng thái: lặp `idle, think, sleep, dance, walk, talk`; một lần `wave,
   happy, celebrate, sad, surprised, no, yes, love, streak` (thời lượng ở `ONE_SHOT`).

@@ -57,7 +57,7 @@ Animation **một lần** chạy xong sẽ tự quay về animation **lặp** g�
 | `size` | `size="160"` hoặc `size="10rem"` | Chiều rộng (mặc định 200px) |
 | `accessory` | `accessory="cap"` | Đội mũ tốt nghiệp |
 
-BipBip luôn đeo vòng cổ da nâu với thẻ tên khắc chữ "BipBip" (`pg-collar`, `pg-tag`); thẻ lắc nhẹ theo nhịp ở vài trạng thái.
+BipBip luôn đeo thẻ tên thú cưng hình khúc xương khắc chữ "BipBip" ở cổ (`pg-tag`); thẻ lắc nhẹ theo nhịp ở vài trạng thái.
 
 ### Sự kiện
 

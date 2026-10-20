@@ -661,6 +661,9 @@
     '<linearGradient id="' + N + 'beak" x1="0" y1="0" x2="0" y2="1">' +
       '<stop offset="0" stop-color="#F7DE80"/><stop offset=".55" stop-color="#F2D46B"/><stop offset="1" stop-color="#E9C95E"/>' +
     '</linearGradient>' +
+    '<linearGradient id="' + N + 'tag" x1="0" y1="0" x2="0" y2="1">' +
+      '<stop offset="0" stop-color="#F6D27A"/><stop offset=".55" stop-color="#E7B455"/><stop offset="1" stop-color="#D59A3B"/>' +
+    '</linearGradient>' +
     '<linearGradient id="' + N + 'beakb" x1="0" y1="0" x2="0" y2="1">' +
       '<stop offset="0" stop-color="#EACB60"/><stop offset="1" stop-color="#E3BE4F"/>' +
     '</linearGradient>';
@@ -698,6 +701,15 @@
   var tufts = 'M95 30 C90 24 90 17 95 13 C95 19 98 24 101 28 Z M100 28 C100 21 103 15 110 14 C106 19 105 24 107 30 Z' +
     'M88 32 C83 29 81 24 83 19 C85 24 89 27 94 29 Z M106 30 C110 26 115 24 119 25 C115 27 112 30 111 33 Z';
 
+  // Thẻ khúc xương: thân chữ nhật bo tròn cộng bốn núm ở hai đầu; grow nới viền ra để vẽ đường viền
+  var TAG_SHAPE = function (g) {
+    return '<rect x="' + (85 - g) + '" y="' + (157.2 - g) + '" width="30" height="14" rx="' + (4 + g) + '"/>' +
+      [[85, 158], [85, 170.4], [115, 158], [115, 170.4]].map(function (c) {
+        return '<circle cx="' + c[0] + '" cy="' + c[1] + '" r="' + (4.4 + g) + '"/>';
+      }).join('');
+  };
+  var TAG_SHADOW = '<g opacity=".16" transform="translate(2 2.4)" fill="#3E4757">' + TAG_SHAPE(1.2) + '</g>';
+
   var character =
     '<g class="pg-bodyg">' +
       // body
@@ -724,23 +736,18 @@
         '<g transform="translate(0 4)"><path d="' + tufts + '" fill="#5A6475"/>' +
         strands('M97 29l-4 -10M101 28l1 -11M104 30l5 -9M92 31l-7 -6', '#5A6475', 1.6) + '</g>' +
       '</g>' +
-      // vòng cổ da nâu + thẻ khắc tên; thẻ lắc nhẹ quanh móc ở (100 146)
-      '<g class="pg-collar">' +
-        '<path d="M62 133 Q100 156 138 133" fill="none" stroke="#6E4524" stroke-width="10" stroke-linecap="round"/>' +
-        '<path d="M62 132 Q100 154 138 132" fill="none" stroke="#9A6234" stroke-width="7" stroke-linecap="round"/>' +
-        '<path d="M64 130.6 Q100 151.4 136 130.6" fill="none" stroke="#B9824E" stroke-width="1.6" stroke-linecap="round" opacity=".7"/>' +
-        '<path d="M66 134 Q100 157 134 134" fill="none" stroke="#5A371B" stroke-width="1.2" stroke-dasharray="3 3.2" stroke-linecap="round" opacity=".75"/>' +
-      '</g>' +
+      // thẻ tên thú cưng hình khúc xương treo ở cổ: khoen kim loại ở (100 143), lắc nhẹ quanh khoen
       '<g class="pg-tag">' +
-        '<ellipse cx="102.5" cy="166" rx="14" ry="13.5" fill="#3E4757" opacity=".18"/>' +
-        '<circle cx="100" cy="147.5" r="3.2" fill="none" stroke="#C9CED6" stroke-width="1.8"/>' +
-        '<circle cx="100" cy="163" r="14" fill="#7A4B25"/>' +
-        '<circle cx="100" cy="162.6" r="12.4" fill="#D9A25F"/>' +
-        '<path d="M89 157 Q100 150 111 157" fill="none" stroke="#F2CD94" stroke-width="1.6" stroke-linecap="round" opacity=".8"/>' +
-        '<g font-family="Arial Rounded MT Bold, Arial, sans-serif" font-weight="900" font-size="6.6" text-anchor="middle">' +
-          '<text x="100" y="166.6" fill="#F6DDB5" opacity=".85">BipBip</text>' +
-          '<text x="100" y="165.6" fill="#5A3417">BipBip</text>' +
+        '<path d="M100 146 L100 157" stroke="#B9BEC8" stroke-width="1.6" stroke-linecap="round"/>' +
+        TAG_SHADOW +
+        '<g fill="#7E5322">' + TAG_SHAPE(1.2) + '</g>' +
+        '<g fill="' + u('tag') + '">' + TAG_SHAPE(0) + '</g>' +
+        '<path d="M88 159 Q100 155.4 112 159" fill="none" stroke="#FFF0C4" stroke-width="1.5" stroke-linecap="round" opacity=".75"/>' +
+        '<g font-family="Arial Rounded MT Bold, Arial, sans-serif" font-weight="900" font-size="7.6" text-anchor="middle">' +
+          '<text x="100" y="168.7" fill="#FFF3CF" opacity=".9">BipBip</text>' +
+          '<text x="100" y="167.7" fill="#6A4116">BipBip</text>' +
         '</g>' +
+        '<circle cx="100" cy="143.6" r="3.6" fill="none" stroke="#C4C9D2" stroke-width="1.7"/>' +
       '</g>' +
       '<g transform="translate(100 33) rotate(-6) scale(1.1) translate(-100 -44)">' + P.CAP + '</g>' +
       '<g class="pg-face">' +
@@ -783,7 +790,7 @@
     '.pg-cheek-l{transform-origin:54px 109px}.pg-cheek-r{transform-origin:146px 109px}' +
     '.pg-brow-l{transform-origin:64px 83px}.pg-brow-r{transform-origin:136px 83px}' +
     '.pg-face{transform-origin:100px 100px}' +
-    '.pg-tag{transform-origin:100px 147px}';
+    '.pg-tag{transform-origin:100px 143.6px}';
 
   P.registerVariant('plush', {
     label: 'Plush',
