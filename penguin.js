@@ -148,6 +148,10 @@
     '.pg[data-state="idle"] .pg-wing-l{animation:pg-sway-l 2.8s ease-in-out infinite}',
     '.pg[data-state="idle"] .pg-wing-r{animation:pg-sway-r 2.8s ease-in-out infinite}',
 
+    /* ---------- thẻ tên lắc nhẹ theo nhịp ---------- */
+    '.pg[data-state="idle"] .pg-tag,.pg[data-state="talk"] .pg-tag{animation:pg-tag-swing 2.8s ease-in-out infinite}',
+    '.pg[data-state="happy"] .pg-tag,.pg[data-state="celebrate"] .pg-tag,.pg[data-state="love"] .pg-tag,.pg[data-state="yes"] .pg-tag{animation:pg-tag-swing-lg .6s ease-in-out infinite}',
+
     /* ---------- WAVE: vẫy tay chào ---------- */
     '.pg[data-state="wave"] .pg-wing-r{animation:pg-wave 2s ease-in-out both}',
     '.pg[data-state="wave"] .pg-bodyg{animation:pg-lean 2s ease-in-out both}',
@@ -276,6 +280,8 @@
     /* ---------- Keyframes ---------- */
     '@keyframes pg-blink{0%,92%,100%{transform:scaleY(1)}95%{transform:scaleY(.08)}}',
     '@keyframes pg-breathe{0%,100%{transform:scale(1,1)}50%{transform:scale(.99,1.025)}}',
+    '@keyframes pg-tag-swing{0%,100%{transform:rotate(0)}30%{transform:rotate(7deg)}70%{transform:rotate(-7deg)}}',
+    '@keyframes pg-tag-swing-lg{0%,100%{transform:rotate(0)}25%{transform:rotate(14deg)}75%{transform:rotate(-14deg)}}',
     '@keyframes pg-sway-l{0%,100%{transform:rotate(0)}50%{transform:rotate(5deg)}}',
     '@keyframes pg-sway-r{0%,100%{transform:rotate(0)}50%{transform:rotate(-5deg)}}',
     '@keyframes pg-wave{0%{transform:rotate(0)}15%{transform:rotate(-145deg)}28%{transform:rotate(-112deg)}41%{transform:rotate(-150deg)}54%{transform:rotate(-112deg)}67%{transform:rotate(-150deg)}82%{transform:rotate(-120deg)}100%{transform:rotate(0)}}',
@@ -718,6 +724,24 @@
         '<g transform="translate(0 4)"><path d="' + tufts + '" fill="#5A6475"/>' +
         strands('M97 29l-4 -10M101 28l1 -11M104 30l5 -9M92 31l-7 -6', '#5A6475', 1.6) + '</g>' +
       '</g>' +
+      // vòng cổ da nâu + thẻ khắc tên; thẻ lắc nhẹ quanh móc ở (100 146)
+      '<g class="pg-collar">' +
+        '<path d="M62 133 Q100 156 138 133" fill="none" stroke="#6E4524" stroke-width="10" stroke-linecap="round"/>' +
+        '<path d="M62 132 Q100 154 138 132" fill="none" stroke="#9A6234" stroke-width="7" stroke-linecap="round"/>' +
+        '<path d="M64 130.6 Q100 151.4 136 130.6" fill="none" stroke="#B9824E" stroke-width="1.6" stroke-linecap="round" opacity=".7"/>' +
+        '<path d="M66 134 Q100 157 134 134" fill="none" stroke="#5A371B" stroke-width="1.2" stroke-dasharray="3 3.2" stroke-linecap="round" opacity=".75"/>' +
+      '</g>' +
+      '<g class="pg-tag">' +
+        '<ellipse cx="102.5" cy="166" rx="14" ry="13.5" fill="#3E4757" opacity=".18"/>' +
+        '<circle cx="100" cy="147.5" r="3.2" fill="none" stroke="#C9CED6" stroke-width="1.8"/>' +
+        '<circle cx="100" cy="163" r="14" fill="#7A4B25"/>' +
+        '<circle cx="100" cy="162.6" r="12.4" fill="#D9A25F"/>' +
+        '<path d="M89 157 Q100 150 111 157" fill="none" stroke="#F2CD94" stroke-width="1.6" stroke-linecap="round" opacity=".8"/>' +
+        '<g font-family="Arial Rounded MT Bold, Arial, sans-serif" font-weight="900" font-size="6.6" text-anchor="middle">' +
+          '<text x="100" y="166.6" fill="#F6DDB5" opacity=".85">BipBip</text>' +
+          '<text x="100" y="165.6" fill="#5A3417">BipBip</text>' +
+        '</g>' +
+      '</g>' +
       '<g transform="translate(100 33) rotate(-6) scale(1.1) translate(-100 -44)">' + P.CAP + '</g>' +
       '<g class="pg-face">' +
         '<g class="pg-brows" fill="none" stroke="' + INK + '" stroke-width="3.2" stroke-linecap="round">' +
@@ -758,7 +782,8 @@
     '.pg-beak-bot,.pg-mouth{transform-origin:100px 107px}' +
     '.pg-cheek-l{transform-origin:54px 109px}.pg-cheek-r{transform-origin:146px 109px}' +
     '.pg-brow-l{transform-origin:64px 83px}.pg-brow-r{transform-origin:136px 83px}' +
-    '.pg-face{transform-origin:100px 100px}';
+    '.pg-face{transform-origin:100px 100px}' +
+    '.pg-tag{transform-origin:100px 147px}';
 
   P.registerVariant('plush', {
     label: 'Plush',
