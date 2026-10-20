@@ -1,0 +1,26 @@
+<!doctype html>
+<meta charset="utf-8">
+<script src="../../penguin.js"></script>
+<script>
+  // Variant thứ hai chỉ để kiểm tra đường đọc thuộc tính; chạy TRƯỚC khi parser gặp các thẻ bên dưới.
+  PenguinMascot.registerVariant('test', { label: 'Test', defs: '', character: '<g id="test-marker"></g>', css: '', fx: {} });
+</script>
+<penguin-mascot id="plush" variant="plush"></penguin-mascot>
+<penguin-mascot id="test" variant="test"></penguin-mascot>
+<penguin-mascot id="none"></penguin-mascot>
+<penguin-mascot id="unknown" variant="classic"></penguin-mascot>
+<pre id="out"></pre>
+<script>
+  const info = (id) => {
+    const el = document.getElementById(id);
+    return { variant: el.variant, test: !!el.shadowRoot.querySelector('#test-marker'), plush: el.shadowRoot.innerHTML.includes('plush-') };
+  };
+  const dyn = document.createElement('penguin-mascot');
+  dyn.setAttribute('variant', 'test');
+  document.body.append(dyn);
+  document.getElementById('out').textContent = JSON.stringify({
+    plush: info('plush'), test: info('test'), none: info('none'), unknown: info('unknown'),
+    dynamic: { variant: dyn.variant, test: !!dyn.shadowRoot.querySelector('#test-marker') },
+    states: customElements.get('penguin-mascot').states,
+  });
+</script>

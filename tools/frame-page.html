@@ -23,7 +23,7 @@
 
   window.setup = async (variant, state, period) => {
     const pg = document.getElementById('pg');
-    // Thuộc tính variant ghi sẵn trong HTML bị bỏ qua lúc parse, nên đặt bằng JS sau khi đã gắn vào DOM.
+    // Đặt variant bằng JS cho chắc, kể cả khi sau này spec có thêm variant khác.
     pg.variant = variant;
     pg.play(state);
     clearTimeout(pg._timer); // animation một lần sẽ không tự quay về idle giữa lúc đang chụp

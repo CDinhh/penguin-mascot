@@ -6,6 +6,7 @@
 (function () {
   'use strict';
 
+  // Danh sách trạng thái và thời lượng phải khớp spec/mascot.json (test/spec.test.mjs kiểm tra).
   // Trạng thái lặp vô hạn (giữ nguyên cho đến khi đổi) và trạng thái chạy một lần (xong tự về idle)
   var LOOPING = ['idle', 'think', 'sleep', 'dance', 'walk', 'talk'];
   var ONE_SHOT = {
@@ -21,15 +22,7 @@
   };
   var STATES = LOOPING.concat(Object.keys(ONE_SHOT));
 
-  var COLORS = {
-    body: '#2B3A67',
-    wing: '#1F2B52',
-    belly: '#FFFFFF',
-    ink: '#1B2440',
-    beak: '#FFA41B',
-    beakDark: '#F08A00',
-    cheek: '#FF8FA3'
-  };
+  var COLORS = { ink: '#1B2440' };
 
   var heart = 'M0 6 C -14 -4 -8 -16 0 -8 C 8 -16 14 -4 0 6 Z';
   var star = 'M0 -9 L2.6 -2.6 L9 0 L2.6 2.6 L0 9 L-2.6 2.6 L-9 0 L-2.6 -2.6 Z';
@@ -58,57 +51,11 @@
       '<circle cx="100" cy="42" r="3.5" fill="#FFC800"/>' +
     '</g>';
 
-  // Phiên bản "classic": chim cánh cụt phẳng kiểu Duolingo.
   // Một phiên bản (variant) gồm: defs (gradient, filter), character (nội dung bên trong .pg-root),
-  // css (tâm xoay riêng nếu hình khác classic) và fx (dịch giọt nước mắt / mồ hôi cho khớp mặt).
-  var CLASSIC = {
-    label: 'Classic',
-    defs: '',
-    character:
-      '<ellipse class="pg-foot-l" cx="80" cy="221" rx="17" ry="8" fill="' + COLORS.beak + '"/>' +
-      '<ellipse class="pg-foot-r" cx="120" cy="221" rx="17" ry="8" fill="' + COLORS.beak + '"/>' +
-      '<g class="pg-bodyg">' +
-        '<path class="pg-body" d="M100 40 C 150 40 172 90 172 140 C 172 195 140 222 100 222 C 60 222 28 195 28 140 C 28 90 50 40 100 40 Z" fill="' + COLORS.body + '"/>' +
-        '<path class="pg-tuft" d="M93 44 C 90 30 104 22 112 29 C 105 31 102 37 105 44 Z" fill="' + COLORS.body + '"/>' +
-        '<path class="pg-belly" d="M100 66 C 112 54 148 52 150 86 C 152 104 144 112 146 128 C 156 150 154 196 132 210 C 120 218 80 218 68 210 C 46 196 44 150 54 128 C 56 112 48 104 50 86 C 52 52 88 54 100 66 Z" fill="' + COLORS.belly + '"/>' +
-        CAP +
-        '<g class="pg-face">' +
-          '<g class="pg-brows">' +
-            '<path class="pg-brow-l" d="M68 70 L90 67" stroke="' + COLORS.ink + '" stroke-width="5" stroke-linecap="round"/>' +
-            '<path class="pg-brow-r" d="M110 67 L132 70" stroke="' + COLORS.ink + '" stroke-width="5" stroke-linecap="round"/>' +
-          '</g>' +
-          '<g class="pg-eye pg-eye-l"><g class="pg-pupil">' +
-            '<circle cx="80" cy="92" r="13" fill="' + COLORS.ink + '"/>' +
-            '<circle cx="85" cy="87" r="4.5" fill="#fff"/><circle cx="76" cy="97" r="2" fill="#fff"/>' +
-          '</g></g>' +
-          '<g class="pg-eye pg-eye-r"><g class="pg-pupil">' +
-            '<circle cx="120" cy="92" r="13" fill="' + COLORS.ink + '"/>' +
-            '<circle cx="125" cy="87" r="4.5" fill="#fff"/><circle cx="116" cy="97" r="2" fill="#fff"/>' +
-          '</g></g>' +
-          '<g class="pg-eyes-happy" fill="none" stroke="' + COLORS.ink + '" stroke-width="6" stroke-linecap="round">' +
-            '<path d="M68 96 Q80 80 92 96"/><path d="M108 96 Q120 80 132 96"/>' +
-          '</g>' +
-          '<g class="pg-eyes-closed" fill="none" stroke="' + COLORS.ink + '" stroke-width="5" stroke-linecap="round">' +
-            '<path d="M68 90 Q80 101 92 90"/><path d="M108 90 Q120 101 132 90"/>' +
-          '</g>' +
-          '<g class="pg-eyes-heart" fill="#FF4B6E">' +
-            '<g transform="translate(80 94) scale(1.5)"><path class="pg-heart-eye" d="' + heart + '"/></g>' +
-            '<g transform="translate(120 94) scale(1.5)"><path class="pg-heart-eye" d="' + heart + '"/></g>' +
-          '</g>' +
-          '<ellipse class="pg-cheek pg-cheek-l" cx="63" cy="112" rx="9" ry="5.5" fill="' + COLORS.cheek + '"/>' +
-          '<ellipse class="pg-cheek pg-cheek-r" cx="137" cy="112" rx="9" ry="5.5" fill="' + COLORS.cheek + '"/>' +
-          '<ellipse class="pg-mouth" cx="100" cy="114" rx="7" ry="6" fill="#8B1E3F"/>' +
-          '<path class="pg-beak-bot" d="M90 110 Q100 114 110 110 Q104 123 100 123 Q96 123 90 110 Z" fill="' + COLORS.beakDark + '"/>' +
-          '<path class="pg-beak-top" d="M85 106 Q100 97 115 106 Q100 117 85 106 Z" fill="' + COLORS.beak + '"/>' +
-        '</g>' +
-        '<path class="pg-wing-l" d="M42 118 C 24 132 16 162 22 184 C 34 178 46 156 48 132 Z" fill="' + COLORS.wing + '"/>' +
-        '<path class="pg-wing-r" d="M158 118 C 176 132 184 162 178 184 C 166 178 154 156 152 132 Z" fill="' + COLORS.wing + '"/>' +
-      '</g>',
-    css: '',
-    fx: { tear: [0, 0], sweat: [0, 0] }
-  };
-
-  var VARIANTS = { classic: CLASSIC };
+  // css (tâm xoay riêng) và fx (dịch giọt nước mắt / mồ hôi cho khớp mặt).
+  // Hiện chỉ có "plush", đăng ký ở cuối file.
+  var DEFAULT_VARIANT = 'plush';
+  var VARIANTS = {};
 
   function fxLayer(opts) {
     var tear = (opts && opts.tear) || [0, 0];
@@ -162,8 +109,6 @@
       '</svg>'
     );
   }
-
-  var SVG = buildSVG(CLASSIC);
 
   var CSS = [
     ':host{display:inline-block;width:var(--pg-size,200px);line-height:0;-webkit-tap-highlight-color:transparent}',
@@ -389,16 +334,25 @@
 
     /** Vẽ lại theo thuộc tính variant, giữ nguyên animation đang chạy */
     _render() {
-      var name = this.getAttribute('variant') || 'classic';
-      var v = VARIANTS[name] || CLASSIC;
+      var name = this._wantedVariant();
+      var v = VARIANTS[name];
       var prev = this._svg ? this._svg.dataset.state : '';
-      this._variant = VARIANTS[name] ? name : 'classic';
+      this._variant = name;
       this._root.innerHTML = '<style>' + CSS + '\n' + (v.css || '') + '</style>' + buildSVG(v);
       this._svg = this._root.querySelector('svg');
       if (prev) this._svg.dataset.state = prev;
     }
 
+    /** Tên variant đang được yêu cầu; tên lạ thì dùng variant mặc định */
+    _wantedVariant() {
+      var name = this.getAttribute('variant');
+      return VARIANTS[name] ? name : DEFAULT_VARIANT;
+    }
+
     connectedCallback() {
+      // Với thẻ viết sẵn trong HTML, constructor chạy trước khi trình duyệt gán thuộc tính,
+      // còn attributeChangedCallback bị bỏ qua khi chưa isConnected, nên phải vẽ lại ở đây.
+      if (this._variant !== this._wantedVariant()) this._render();
       this._applySize();
       this.play(this.getAttribute('state') || 'idle');
     }
@@ -459,8 +413,11 @@
     }
   } : null;
 
-  if (PenguinMascot && typeof customElements !== 'undefined' && !customElements.get('penguin-mascot')) {
-    customElements.define('penguin-mascot', PenguinMascot);
+  // Chỉ đăng ký thẻ sau khi đã có variant mặc định (gọi ở cuối file), để thẻ viết sẵn trong HTML vẽ đúng ngay.
+  function define() {
+    if (PenguinMascot && typeof customElements !== 'undefined' && !customElements.get('penguin-mascot')) {
+      customElements.define('penguin-mascot', PenguinMascot);
+    }
   }
 
   /**
@@ -470,13 +427,13 @@
   function registerVariant(name, spec) {
     VARIANTS[name] = spec;
     if (typeof document === 'undefined') return;
-    var els = document.querySelectorAll('penguin-mascot[variant="' + name + '"]');
-    for (var i = 0; i < els.length; i++) els[i]._render();
+    var els = document.querySelectorAll('penguin-mascot');
+    for (var i = 0; i < els.length; i++) if (els[i]._svg) els[i]._render();
   }
 
   var api = {
-    SVG: SVG, CSS: CSS, CAP: CAP, HEART: heart, STAR: star, STATES: STATES, LOOPING: LOOPING, ONE_SHOT: ONE_SHOT,
-    VARIANTS: VARIANTS, buildSVG: buildSVG, registerVariant: registerVariant, PenguinMascot: PenguinMascot
+    CSS: CSS, CAP: CAP, HEART: heart, STAR: star, STATES: STATES, LOOPING: LOOPING, ONE_SHOT: ONE_SHOT,
+    VARIANTS: VARIANTS, buildSVG: buildSVG, registerVariant: registerVariant, define: define, PenguinMascot: PenguinMascot
   };
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
   if (typeof window !== 'undefined') window.PenguinMascot = api;
@@ -710,4 +667,5 @@
     css: css,
     fx: { tear: [-9, -3], sweat: [4, -2] }
   });
+  P.define();
 })();

@@ -37,7 +37,6 @@
   button:active { transform: translateY(3px); border-bottom-width: 2px; margin-bottom: 3px; }
   button[aria-pressed="true"] { border-color: var(--blue); background: color-mix(in srgb, var(--blue) 14%, var(--card)); }
   button small { display: block; font-weight: 600; font-size: 12px; color: var(--muted); }
-  .variants { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin-bottom: 20px; }
   .controls { display: flex; flex-wrap: wrap; gap: 16px; align-items: center; font-weight: 700; color: var(--muted); }
   .controls label { display: flex; gap: 8px; align-items: center; }
   .quiz { margin-top: 20px; }
@@ -50,8 +49,8 @@
 </head>
 <body>
 <main>
-  <h1>Pingu, linh vật chim cánh cụt</h1>
-  <p class="sub">Chọn phiên bản, rồi bấm vào từng nút để xem animation. Dùng được trong mọi web app bằng thẻ <code>&lt;penguin-mascot&gt;</code>.</p>
+  <h1>BipBip, linh vật chim cánh cụt</h1>
+  <p class="sub">Bấm vào từng nút để xem animation. Dùng được trong mọi web app bằng thẻ <code>&lt;penguin-mascot&gt;</code>.</p>
 
   <div class="layout">
     <section class="card stage">
@@ -60,11 +59,6 @@
     </section>
 
     <section class="card">
-      <h2>Phiên bản</h2>
-      <div class="variants" id="variants">
-        <button data-variant="plush" aria-pressed="true">Bông<small>giống thú bông</small></button>
-        <button data-variant="classic" aria-pressed="false">Cổ điển<small>phẳng, kiểu Duolingo</small></button>
-      </div>
       <h2>Lặp liên tục</h2>
       <div class="grid" id="loops"></div>
       <h2>Chạy một lần</h2>
@@ -97,7 +91,6 @@
   pg.play('happy');                  // trả lời đúng
   await pg.play('sad');              // chờ animation xong
   pg.setAttribute('state', 'think'); // hoặc đổi bằng thuộc tính
-  pg.variant = 'classic';            // đổi sang bản cổ điển
 &lt;/script&gt;</code></pre>
   </section>
 </main>
@@ -132,14 +125,6 @@
   pg.addEventListener('statechange', (e) => {
     label.textContent = e.detail.state;
     buttons.forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.state === e.detail.state)));
-  });
-
-  document.querySelectorAll('#variants button').forEach((b) => {
-    b.onclick = () => {
-      pg.setAttribute('variant', b.dataset.variant);
-      document.querySelectorAll('#variants button').forEach((x) => x.setAttribute('aria-pressed', String(x === b)));
-      pg.play('wave');
-    };
   });
 
   document.getElementById('cap').onchange = (e) =>
