@@ -93,7 +93,32 @@ export function Mascot({ state }) {
 - `penguin.js`: Web Component (SVG + CSS + API), ~28 KB, không phụ thuộc gì
 - `penguin-plush.svg`, `penguin.svg`: hình tĩnh của 2 phiên bản, dùng làm icon, ảnh đại diện
 - `index.html`: trang demo
+- `tools/export-frames.mjs`: xuất sprite sheet cho app native (xem mục trên)
 
-## Dùng cho app di động?
+## Dùng cho app di động / Flutter (sprite sheet)
 
-Bản này chạy trên web (kể cả WebView). Nếu app viết bằng Flutter, React Native, Swift hay Kotlin, có thể chuyển sang **Rive** hoặc **Lottie**: nhập `penguin.svg` vào Rive editor (các bộ phận đã tách lớp sẵn: thân, bụng, mắt, mỏ, cánh, chân) rồi dựng lại các animation theo bảng ở trên.
+Bản bông dùng filter SVG (`feTurbulence`) và CSS animation nên không nhúng thẳng được vào Flutter, Swift hay Kotlin. Thay vào đó, công cụ `tools/export-frames.mjs` **tua animation CSS tới từng khung rồi chụp qua Chrome**, xuất mỗi animation thành một sprite sheet WebP trong suốt cộng một `manifest.json`. Mọi nền tảng đều đọc được, chuyển động giữ nguyên như bản web.
+
+```bash
+npm run export:frames -- --variant plush --out export/plush
+npm run export:frames -- --states idle,wave,happy,sad --fps 15 --out ../app/assets/mascot
+```
+
+Cần Chrome và Node 22+, không cần cài thư viện. Tuỳ chọn: `--variant` (plush|classic), `--states` (mặc định tất cả 15), `--fps` (15), `--size` (256x320, kích thước một khung), `--cols` (8, số khung mỗi hàng), `--quality` (0.8), `--chrome` (đường dẫn Chrome nếu không ở chỗ mặc định).
+
+Kết quả:
+
+```text
+export/plush/
+├── manifest.json      # variant, frameWidth/Height, fps, columns, states{ file, frames, durationMs, loop }
+├── idle.webp          # sprite sheet: khung xếp từ trái sang phải, từ trên xuống dưới
+├── wave.webp
+└── ...
+```
+
+- Animation **lặp** (`loop: true`) được cân lại để khung cuối nối khớp khung đầu; chạy vòng tròn là mượt.
+- Animation **một lần** chạy hết `durationMs` rồi nên quay về `idle` (giống component web).
+- Mỗi khung `frameWidth × frameHeight` ở vị trí `(i % columns, i ~/ columns)`. Phát bằng cách đổi chỉ số khung theo `fps`.
+- Thêm animation mới: thêm vào `penguin.js` như hướng dẫn ở mục Tuỳ biến, rồi khai thời lượng trong `LOOPS` hoặc `ONE_SHOT` ở đầu `tools/export-frames.mjs`.
+
+Ví dụ Flutter nằm trong repo PRM393_G6_FE (`Mascot` trong `lib/widgets/`). Nếu cần hình vector có thể chỉnh được trong editor, có thể nhập `penguin.svg` vào **Rive** (các bộ phận đã tách lớp sẵn) rồi dựng lại animation theo bảng ở trên.

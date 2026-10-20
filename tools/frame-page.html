@@ -1,0 +1,57 @@
+<!doctype html>
+<meta charset="utf-8">
+<style>
+  html, body { margin: 0; background: transparent; overflow: hidden; }
+  #w { width: 100vw; height: 100vh; display: flex; align-items: center; justify-content: center; }
+</style>
+<script src="../penguin.js"></script>
+<div id="w"><penguin-mascot id="pg"></penguin-mascot></div>
+<script>
+  // Trang phụ trợ cho tools/export-frames.mjs: dựng linh vật rồi "tua" animation tới từng thời điểm.
+  const frame = () => new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
+
+  // Đổi mọi animation vô hạn thành đúng `period` ms (hoặc ước số nguyên của nó) để vòng lặp khớp đuôi với đầu.
+  function normalize(anims, period) {
+    for (const a of anims) {
+      const t = a.effect.getComputedTiming();
+      if (t.iterations !== Infinity || !t.duration) continue;
+      const cycle = t.duration * (t.direction.includes('alternate') ? 2 : 1);
+      const n = Math.max(1, Math.round(period / cycle));
+      a.effect.updateTiming({ duration: period / n / (t.direction.includes('alternate') ? 2 : 1) });
+    }
+  }
+
+  window.setup = async (variant, state, period) => {
+    const pg = document.getElementById('pg');
+    // Thuộc tính variant ghi sẵn trong HTML bị bỏ qua lúc parse, nên đặt bằng JS sau khi đã gắn vào DOM.
+    pg.variant = variant;
+    pg.play(state);
+    clearTimeout(pg._timer); // animation một lần sẽ không tự quay về idle giữa lúc đang chụp
+    await frame();
+    const anims = pg.shadowRoot.getAnimations({ subtree: true });
+    if (period) normalize(anims, period);
+    window.__anims = anims;
+    return anims.length;
+  };
+
+  window.seek = async (ms) => {
+    for (const a of window.__anims) { a.pause(); a.currentTime = ms; }
+    await frame();
+  };
+
+  window.fit = (px) => document.getElementById('pg').setAttribute('size', String(px));
+
+  // Ghép các khung (dataURL) thành một sprite sheet dạng lưới.
+  window.sheet = async (urls, cols, w, h, mime, quality) => {
+    const rows = Math.ceil(urls.length / cols);
+    const c = document.createElement('canvas');
+    c.width = cols * w; c.height = rows * h;
+    const g = c.getContext('2d');
+    await Promise.all(urls.map((u, i) => new Promise((res) => {
+      const img = new Image();
+      img.onload = () => { g.drawImage(img, (i % cols) * w, Math.floor(i / cols) * h); res(); };
+      img.src = u;
+    })));
+    return c.toDataURL(mime, quality);
+  };
+</script>

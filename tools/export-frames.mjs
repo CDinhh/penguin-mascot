@@ -1,0 +1,112 @@
+// Xuất animation của linh vật thành sprite sheet (WebP trong suốt) + manifest.json,
+// để dùng trong app native / Flutter mà không cần trình duyệt.
+//
+//   node tools/export-frames.mjs --variant plush --out export/plush
+//   node tools/export-frames.mjs --states idle,wave,happy --fps 15 --size 256x320
+//
+// Cần Chrome và Node 22+ (dùng WebSocket có sẵn). Không cần cài thư viện nào.
+import { spawn } from 'node:child_process';
+import { mkdirSync, mkdtempSync, rmSync, writeFileSync, existsSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join, resolve, dirname } from 'node:path';
+import { fileURLToPath, pathToFileURL } from 'node:url';
+
+const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
+
+const args = Object.fromEntries(
+  process.argv.slice(2).reduce((acc, a, i, all) => {
+    if (a.startsWith('--')) acc.push([a.slice(2), all[i + 1] && !all[i + 1].startsWith('--') ? all[i + 1] : 'true']);
+    return acc;
+  }, []),
+);
+
+const variant = args.variant || 'plush';
+const out = resolve(args.out || join(root, 'export', variant));
+const fps = Number(args.fps || 15);
+const [W, H] = (args.size || '256x320').split('x').map(Number);
+const cols = Number(args.cols || 8);
+const quality = Number(args.quality || 0.8);
+const chrome = args.chrome || [
+  'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe',
+  'C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe',
+  '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',
+  '/usr/bin/google-chrome',
+  '/usr/bin/chromium',
+].find((p) => existsSync(p));
+if (!chrome) throw new Error('Không tìm thấy Chrome, truyền --chrome <đường dẫn>.');
+
+// Độ dài (ms) của mỗi animation. Trạng thái một lần lấy từ penguin.js; trạng thái lặp là một chu kỳ
+// đủ dài để mọi chuyển động (thở, chớp mắt, vẫy cánh) lặp nguyên số lần và khớp đuôi với đầu.
+const LOOPS = { idle: 2800, think: 3000, sleep: 3000, dance: 1600, walk: 1800, talk: 640 };
+const ONE_SHOT = { wave: 2000, happy: 1200, celebrate: 2600, sad: 2600, surprised: 1400, no: 1200, yes: 1200, love: 2400, streak: 2400 };
+const all = { ...Object.fromEntries(Object.entries(LOOPS).map(([k, v]) => [k, { ms: v, loop: true }])),
+  ...Object.fromEntries(Object.entries(ONE_SHOT).map(([k, v]) => [k, { ms: v, loop: false }])) };
+const states = (args.states ? args.states.split(',') : Object.keys(all));
+for (const s of states) if (!all[s]) throw new Error(`Không có animation "${s}". Có: ${Object.keys(all).join(', ')}`);
+
+const port = 9300 + Math.floor(Math.random() * 500);
+const profile = mkdtempSync(join(tmpdir(), 'pg-export-'));
+const proc = spawn(chrome, ['--headless=new', '--disable-gpu', '--hide-scrollbars', `--remote-debugging-port=${port}`,
+  `--user-data-dir=${profile}`, 'about:blank'], { stdio: 'ignore' });
+
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+async function getJson(path) {
+  for (let i = 0; i < 100; i++) {
+    try { return await (await fetch(`http://127.0.0.1:${port}${path}`)).json(); } catch { await sleep(100); }
+  }
+  throw new Error('Không kết nối được Chrome');
+}
+
+try {
+  const targets = await getJson('/json/list');
+  const ws = new WebSocket(targets.find((t) => t.type === 'page').webSocketDebuggerUrl);
+  await new Promise((r, j) => { ws.onopen = r; ws.onerror = j; });
+  let id = 0;
+  const pending = new Map();
+  ws.onmessage = (e) => {
+    const m = JSON.parse(e.data);
+    if (m.id && pending.has(m.id)) { const { res, rej } = pending.get(m.id); pending.delete(m.id); m.error ? rej(new Error(m.error.message)) : res(m.result); }
+  };
+  const cdp = (method, params = {}) => new Promise((res, rej) => { pending.set(++id, { res, rej }); ws.send(JSON.stringify({ id, method, params })); });
+  const evalJs = async (expression) => {
+    const r = await cdp('Runtime.evaluate', { expression, awaitPromise: true, returnByValue: true });
+    if (r.exceptionDetails) throw new Error(r.exceptionDetails.exception?.description || 'Lỗi JS trong trang');
+    return r.result.value;
+  };
+
+  await cdp('Page.enable');
+  await cdp('Emulation.setDeviceMetricsOverride', { width: W, height: H, deviceScaleFactor: 1, mobile: false });
+  await cdp('Emulation.setDefaultBackgroundColorOverride', { color: { r: 0, g: 0, b: 0, a: 0 } });
+  await cdp('Page.navigate', { url: pathToFileURL(join(root, 'tools', 'frame-page.html')).href });
+  await sleep(500);
+  await evalJs(`customElements.whenDefined('penguin-mascot')`);
+
+  mkdirSync(out, { recursive: true });
+  const manifest = { variant, frameWidth: W, frameHeight: H, fps, columns: cols, states: {} };
+  // Linh vật chiếm khoảng 88% bề rộng khung, chừa chỗ cho pháo giấy, tim, Zzz bay ra ngoài.
+  await evalJs(`fit(${Math.round(W * 0.88)})`);
+
+  for (const state of states) {
+    const { ms, loop } = all[state];
+    await evalJs(`setup(${JSON.stringify(variant)}, ${JSON.stringify(state)}, ${loop ? ms : 0})`);
+    const count = Math.round((ms / 1000) * fps);
+    const urls = [];
+    for (let i = 0; i < count; i++) {
+      await evalJs(`seek(${(i * ms) / count})`);
+      const shot = await cdp('Page.captureScreenshot', { format: 'webp', quality: Math.round(quality * 100), fromSurface: true });
+      urls.push(`data:image/webp;base64,${shot.data}`);
+    }
+    const sheet = await evalJs(`sheet(${JSON.stringify(urls)}, ${cols}, ${W}, ${H}, 'image/webp', ${quality})`);
+    const file = `${state}.webp`;
+    writeFileSync(join(out, file), Buffer.from(sheet.split(',')[1], 'base64'));
+    manifest.states[state] = { file, frames: count, durationMs: ms, loop };
+    console.log(`${state}: ${count} khung, ${ms}ms${loop ? ' (lặp)' : ''}`);
+  }
+
+  writeFileSync(join(out, 'manifest.json'), JSON.stringify(manifest, null, 2) + '\n');
+  console.log(`Xong: ${out}`);
+  ws.close();
+} finally {
+  proc.kill();
+  try { rmSync(profile, { recursive: true, force: true }); } catch {}
+}

@@ -3,7 +3,10 @@
   "version": "1.0.0",
   "description": "Linh vật chim cánh cụt (SVG + CSS animation) dạng Web Component cho app học tập",
   "main": "penguin.js",
-  "files": ["penguin.js", "penguin.svg", "penguin-plush.svg"],
+  "files": ["penguin.js", "penguin.svg", "penguin-plush.svg", "tools"],
+  "scripts": {
+    "export:frames": "node tools/export-frames.mjs"
+  },
   "keywords": ["mascot", "penguin", "svg", "animation", "web-component"],
   "license": "MIT"
 }
