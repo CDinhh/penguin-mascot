@@ -1,22 +1,24 @@
-// RiveDriver với Rive giả: ánh xạ trạng thái -> input theo spec, chờ event `done`, phát lại, lỗi nạp.
+// RiveDriver với Rive giả: ánh xạ trạng thái -> property của view model theo spec, chờ state machine về state lặp, phát lại, lỗi nạp.
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { RiveDriver } from '../packages/web-rive/src/driver.js';
 import { SPEC } from '../packages/web-rive/src/spec.generated.js';
 
-const EventType = { RiveEvent: 'riveevent' };
+const EventType = { StateChange: 'statechange' };
 
-function fakeRive({ inputs, fail } = {}) {
+function fakeRive({ inputs, fail, noViewModel } = {}) {
   const made = {};
   class Rive {
     constructor(opts) {
       made.opts = opts; made.rive = this; made.handlers = {}; made.paused = 0; made.played = 0; made.cleaned = 0;
-      this.names = inputs || [...new Set(Object.values(SPEC.states).map((s) => s.riveInput.name))];
-      this.inputs = this.names.map((name) => ({ name, value: undefined, fired: 0, fire() { this.fired++; } }));
-      made.inputs = Object.fromEntries(this.inputs.map((i) => [i.name, i]));
+      const wanted = new Map(Object.values(SPEC.states).map((s) => [s.riveInput.name, s.riveInput.type]));
+      const names = inputs || [...wanted.keys()];
+      made.inputs = Object.fromEntries(names.map((name) => [name, { value: undefined, fired: 0, trigger() { this.fired++; } }]));
+      made.cap = { value: undefined };
+      const pick = (type) => (n) => (wanted.get(n) === type ? made.inputs[n] ?? null : null);
+      this.viewModelInstance = noViewModel ? null : { number: pick('number'), trigger: pick('trigger'), boolean: (n) => (n === SPEC.rive.capInput.name ? made.cap : null) };
       setTimeout(() => (fail ? opts.onLoadError(new Error('404')) : opts.onLoad()), 0);
     }
-    stateMachineInputs() { return this.inputs; }
     on(t, cb) { made.handlers[t] = cb; }
     off(t) { delete made.handlers[t]; }
     pause() { made.paused++; }
@@ -33,11 +35,13 @@ const make = (o) => {
   const d = new RiveDriver({ Rive, EventType, canvas: {}, src: 'x.riv', onError: (e) => errors.push(e) });
   return { d, made, errors };
 };
+const state = (made, names) => made.handlers[EventType.StateChange]({ data: names });
 
-test('nạp đúng artboard và state machine theo spec', async () => {
+test('nạp đúng artboard và state machine theo spec, tự gắn view model', async () => {
   const { made } = make();
   assert.equal(made.opts.artboard, 'BipBip Plush');
   assert.equal(made.opts.stateMachine, 'Main');
+  assert.equal(made.opts.autoBind, true);
 });
 
 test('trạng thái lặp đặt mood theo spec, trước và sau khi nạp xong', async () => {
@@ -49,7 +53,7 @@ test('trạng thái lặp đặt mood theo spec, trước và sau khi nạp xong
   assert.equal(made.inputs.mood.value, SPEC.states.sleep.riveInput.value);
 });
 
-test('trạng thái một lần bắn trigger và resolve khi có event done', async () => {
+test('trạng thái một lần bắn trigger và resolve khi state machine về state lặp', async () => {
   const { d, made } = make();
   await tick();
   let done = false;
@@ -57,12 +61,29 @@ test('trạng thái một lần bắn trigger và resolve khi có event done', a
   assert.equal(made.inputs.happy.fired, 1);
   await tick();
   assert.equal(done, false);
-  made.handlers[EventType.RiveEvent]({ data: { name: 'khac' } });
+  state(made, ['idle']); // chưa vào state của trạng thái nên chưa tính là xong
   await tick();
-  assert.equal(done, false, 'event khác không làm xong');
-  made.handlers[EventType.RiveEvent]({ data: { name: 'done' } });
+  assert.equal(done, false, 'state lặp đến trước khi bắt đầu không làm xong');
+  state(made, ['happy']);
+  await tick();
+  assert.equal(done, false, 'đang chạy chưa xong');
+  state(made, ['blink']);
+  await tick();
+  assert.equal(done, false, 'state khác không làm xong');
+  state(made, ['idle']);
   await p;
   assert.equal(done, true);
+});
+
+test('mọi state lặp trong spec.rive.doneStates đều báo xong', async () => {
+  for (const name of SPEC.rive.doneStates) {
+    const { d, made } = make();
+    await tick();
+    const p = d.play('sad');
+    state(made, ['sad']);
+    state(made, [name]);
+    await p;
+  }
 });
 
 test('chạy lại cùng trạng thái bắn trigger lần nữa và resolve lượt trước', async () => {
@@ -72,11 +93,12 @@ test('chạy lại cùng trạng thái bắn trigger lần nữa và resolve lư
   const second = d.play('sad');
   await first; // bị lượt sau thay thế nên resolve ngay
   assert.equal(made.inputs.sad.fired, 2);
-  made.handlers[EventType.RiveEvent]({ data: { name: 'done' } });
+  state(made, ['sad']);
+  state(made, ['idle']);
   await second;
 });
 
-test('không có event done thì resolve sau durationMs + dư', async (t) => {
+test('không nhận được thay đổi state thì resolve sau durationMs + dư', async (t) => {
   t.mock.timers.enable({ apis: ['setTimeout'] });
   const { d } = make();
   t.mock.timers.tick(1);
@@ -95,6 +117,18 @@ test('giảm chuyển động: không bắn trigger nhưng vẫn resolve', async
   await tick();
   await d.play('love', { reduceMotion: true });
   assert.equal(made.inputs.love.fired, 0);
+});
+
+test('mũ tốt nghiệp: mặc định không đội, đổi được trước và sau khi nạp', async () => {
+  const { d, made } = make();
+  d.setCap(true); // chưa nạp xong: nhớ lại để áp dụng sau
+  await tick();
+  assert.equal(made.cap.value, true);
+  d.setCap(false);
+  assert.equal(made.cap.value, false);
+  const other = make();
+  await tick();
+  assert.equal(other.made.cap.value, false, 'mặc định không mũ để khớp web component');
 });
 
 test('tạm dừng và chạy lại, hủy gọi cleanup', async () => {
@@ -124,6 +158,14 @@ test('file thiếu input theo spec bị coi là lỗi', async () => {
   await tick();
   assert.equal(errors.length, 1);
   assert.match(errors[0].message, /wave|happy/);
+  assert.equal(d.destroyed, true);
+});
+
+test('file không gắn view model bị coi là lỗi', async () => {
+  const { d, errors } = make({ noViewModel: true });
+  await tick();
+  assert.equal(errors.length, 1);
+  assert.match(errors[0].message, /view model/);
   assert.equal(d.destroyed, true);
 });
 

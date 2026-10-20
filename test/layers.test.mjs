@@ -27,7 +27,7 @@ test('rive/README.md nhắc đủ trạng thái và input trong spec', () => {
   for (const name of Object.keys(spec.states)) assert.ok(md.includes(`\`${name}\``), name);
   for (const i of spec.rive.extraInputs) assert.ok(md.includes(`\`${i.name}\``), i.name);
   assert.ok(md.includes('`tag`') && md.includes('`strap`') && !md.includes('collar'));
-  assert.ok(md.includes(spec.rive.artboards.plush) && md.includes(spec.rive.stateMachine) && md.includes(spec.rive.doneEvent));
+  assert.ok(md.includes(spec.rive.artboards.plush) && md.includes(spec.rive.stateMachine) && md.includes(spec.rive.viewModel));
 });
 
 test('ghép các lớp lại trùng hình gốc', { skip: !findChrome() && 'không tìm thấy Chrome (đặt biến CHROME)', timeout: 120000 }, async () => {

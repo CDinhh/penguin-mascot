@@ -20,5 +20,6 @@ API giống bản SVG: `el.play('happy')` trả về Promise (resolve khi animat
 - **Đường lùi**: không nạp được file (thiếu, hỏng, thiếu input theo spec) thì thẻ tự về SVG và phát sự kiện `rendererfallback` (`detail.error`).
 - **Hiệu năng**: dừng vẽ khi khuất màn hình (`IntersectionObserver`), tab ẩn (`visibilitychange`) và khi `prefers-reduced-motion`; mỗi thẻ một instance Rive.
 - **WASM**: mặc định runtime tải `rive.wasm` từ CDN của Rive. Dùng `configure({ wasmUrl })` để tự host (xem `examples/web-rive`).
-- Trạng thái, thời lượng, input lấy từ `src/spec.generated.js` (sinh từ `spec/mascot.json` bằng `npm run codegen`).
+- Điều khiển qua view model `Mascot` (tự gắn vào artboard): `mood`, trigger theo trạng thái, `cap` (thuộc tính `accessory="cap"` của thẻ). Xong một lần = state machine về lại state lặp.
+- Trạng thái, thời lượng, property lấy từ `src/spec.generated.js` (sinh từ `spec/mascot.json` bằng `npm run codegen`).
 - `driver` (`@prm393/penguin-mascot-rive/driver`) không phụ thuộc DOM hay thư viện Rive, có test với Rive giả.

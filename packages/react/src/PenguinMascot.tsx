@@ -1,10 +1,10 @@
 import { createElement, useCallback, useEffect, useRef, useState, type CSSProperties } from 'react';
 import { useRive } from '@rive-app/react-canvas';
-import { EventType, type StateMachineInput } from '@rive-app/canvas';
+import { EventType, type ViewModelInstanceNumber, type ViewModelInstanceTrigger, type ViewModelInstanceBoolean } from '@rive-app/canvas';
 import '@prm393/penguin-mascot';
 import { DEFAULT_VARIANT, MASCOT_STATES, RIVE, type MascotState, type MascotVariant } from './states';
 
-/** Chờ thêm sau durationMs trước khi coi là xong, phòng file .riv quên phát event `done`. */
+/** Chờ thêm sau durationMs trước khi coi là xong, phòng không nhận được thay đổi state của state machine. */
 const DONE_SLACK_MS = 600;
 
 export interface PenguinMascotProps {
@@ -13,6 +13,8 @@ export interface PenguinMascotProps {
   /** Chiều rộng (px hoặc chuỗi CSS), mặc định 200. */
   size?: number | string;
   variant?: MascotVariant;
+  /** Đội mũ tốt nghiệp (chỉ renderer Rive; web component dùng `accessory="cap"`). */
+  cap?: boolean;
   /** Gọi khi animation một lần chạy xong (hoặc bị bỏ qua vì giảm chuyển động). */
   onDone?: (state: MascotState) => void;
   /** Đổi giá trị này để phát lại đúng trạng thái một lần đang chọn (ví dụ trả lời sai hai lần liền). */
@@ -44,7 +46,7 @@ function useReducedMotion(force?: boolean): boolean {
  * API giống web component: `state`, `size`, `variant`, `onDone`.
  */
 export function PenguinMascot({
-  state = 'idle', size = 200, variant = DEFAULT_VARIANT, onDone, replayKey, src = RIVE.file, reducedMotion, onFallback, className, style,
+  state = 'idle', size = 200, variant = DEFAULT_VARIANT, cap = false, onDone, replayKey, src = RIVE.file, reducedMotion, onFallback, className, style,
 }: PenguinMascotProps) {
   const reduced = useReducedMotion(reducedMotion);
   const [failed, setFailed] = useState(false);
@@ -56,24 +58,35 @@ export function PenguinMascot({
 
   const artboard = (RIVE.artboards as Record<string, string>)[variant];
   const { rive, RiveComponent } = useRive(
-    failed ? null : { src, artboard, stateMachine: RIVE.stateMachine, autoplay: true, onLoadError: () => fail(new Error('Không nạp được file .riv')) },
+    failed ? null : { src, artboard, stateMachine: RIVE.stateMachine, autoplay: true, autoBind: true, onLoadError: () => fail(new Error('Không nạp được file .riv')) },
     { shouldUseIntersectionObserver: true },
   );
 
-  // Input của state machine, kiểm tra đủ theo spec ngay khi file nạp xong
-  const inputs = useRef(new Map<string, StateMachineInput>());
+  // Property của view model `${RIVE.viewModel}` (đã tự gắn vào artboard), kiểm tra đủ theo spec ngay khi file nạp xong
+  const inputs = useRef(new Map<string, ViewModelInstanceNumber | ViewModelInstanceTrigger>());
+  const capProp = useRef<ViewModelInstanceBoolean | null>(null);
   const [ready, setReady] = useState(false);
   useEffect(() => {
     if (!rive) return;
-    inputs.current = new Map((rive.stateMachineInputs(RIVE.stateMachine) ?? []).map((i) => [i.name, i]));
+    const vmi = rive.viewModelInstance;
+    if (!vmi) { fail(new Error(`File .riv không có view model "${RIVE.viewModel}" gắn vào artboard`)); return; }
+    inputs.current = new Map();
+    for (const s of Object.values(MASCOT_STATES)) {
+      const { type, name } = s.riveInput;
+      const prop = type === 'number' ? vmi.number(name) : vmi.trigger(name);
+      if (prop) inputs.current.set(name, prop);
+    }
     const missing = [...new Set(Object.values(MASCOT_STATES).map((s) => s.riveInput.name))].filter((n) => !inputs.current.has(n));
     if (missing.length) { fail(new Error(`File .riv thiếu input: ${missing.join(', ')}`)); return; }
+    capProp.current = vmi.boolean(RIVE.capInput.name);
     setReady(true);
     return () => setReady(false);
   }, [rive, fail]);
 
-  // Event `done` do state machine phát khi animation một lần xong
-  const pending = useRef<{ state: MascotState; timer: ReturnType<typeof setTimeout> } | null>(null);
+  useEffect(() => { if (ready && capProp.current) capProp.current.value = cap; }, [ready, cap]);
+
+  // Xong một lần = state machine rời state của trạng thái đó và về một state lặp (RIVE.doneStates)
+  const pending = useRef<{ state: MascotState; timer: ReturnType<typeof setTimeout>; started: boolean } | null>(null);
   const finish = useCallback(() => {
     const p = pending.current;
     if (!p) return;
@@ -84,23 +97,27 @@ export function PenguinMascot({
   useEffect(() => {
     if (!rive || !ready) return;
     const handler = (e: { data?: unknown }) => {
-      if ((e.data as { name?: string } | undefined)?.name === RIVE.doneEvent) finish();
+      const p = pending.current;
+      const names = (Array.isArray(e.data) ? e.data : []) as string[];
+      if (!p) return;
+      if (names.includes(p.state)) p.started = true;
+      if (p.started && names.some((n) => (RIVE.doneStates as readonly string[]).includes(n))) finish();
     };
-    rive.on(EventType.RiveEvent, handler);
-    return () => { rive.off(EventType.RiveEvent, handler); finish(); };
+    rive.on(EventType.StateChange, handler);
+    return () => { rive.off(EventType.StateChange, handler); finish(); };
   }, [rive, ready, finish]);
 
-  // Áp dụng trạng thái: lặp -> mood; một lần -> bắn trigger (đổi replayKey để chạy lại cùng trạng thái)
+  // Áp dụng trạng thái: lặp -> mood; một lần -> bắn trigger của view model (đổi replayKey để chạy lại cùng trạng thái)
   useEffect(() => {
     if (!rive || !ready) return;
     const info = MASCOT_STATES[state];
     const input = inputs.current.get(info.riveInput.name);
     if (!input) return;
-    if (info.riveInput.type === 'number') { input.value = info.riveInput.value; return; }
+    if (info.riveInput.type === 'number') { (input as ViewModelInstanceNumber).value = info.riveInput.value; return; }
     if (reduced) { queueMicrotask(() => onDoneRef.current?.(state)); return; }
     finish(); // lượt trước bị thay thế
-    pending.current = { state, timer: setTimeout(finish, info.durationMs + DONE_SLACK_MS) };
-    input.fire();
+    pending.current = { state, timer: setTimeout(finish, info.durationMs + DONE_SLACK_MS), started: false };
+    (input as ViewModelInstanceTrigger).trigger();
   }, [rive, ready, state, replayKey, reduced, finish]);
 
   // Giảm chuyển động: đứng yên. Khuất màn hình thì useRive tự dừng (IntersectionObserver).

@@ -138,7 +138,19 @@ export const SPEC = {
       "plush": "BipBip Plush"
     },
     "stateMachine": "Main",
-    "doneEvent": "done",
+    "viewModel": "Mascot",
+    "doneStates": [
+      "idle",
+      "think",
+      "sleep_start",
+      "dance_start",
+      "walk_start",
+      "talk"
+    ],
+    "capInput": {
+      "type": "boolean",
+      "name": "cap"
+    },
     "extraInputs": [
       {
         "type": "number",

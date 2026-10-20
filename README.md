@@ -94,7 +94,9 @@ export function Mascot({ state }) {
 - `examples/web/index.html`: trang demo (đủ 15 trạng thái)
 - `tools/export-frames.mjs`: xuất sprite sheet cho app native (xem mục trên)
 
-## Dùng cho app di động / Flutter (sprite sheet)
+## Dùng cho app di động / Flutter
+
+**Flutter dùng Rive:** xem hướng dẫn từng bước ở [`packages/flutter/README.md`](packages/flutter/README.md) (thêm package, chép `rive/bipbip.riv`, `MascotConfig.riveAsset`, widget `Mascot`). Phần dưới là đường lùi bằng sprite sheet.
 
 Bản bông dùng filter SVG (`feTurbulence`) và CSS animation nên không nhúng thẳng được vào Flutter, Swift hay Kotlin. Thay vào đó, công cụ `tools/export-frames.mjs` **tua animation CSS tới từng khung rồi chụp qua Chrome**, xuất mỗi animation thành một sprite sheet WebP trong suốt cộng một `manifest.json`. Mọi nền tảng đều đọc được, chuyển động giữ nguyên như bản web.
 
@@ -133,7 +135,7 @@ spec/mascot.json     nguồn sự thật: trạng thái, thời lượng, loop, 
 packages/web         web component <penguin-mascot> (@prm393/penguin-mascot, chưa publish)
 packages/web-rive    renderer="rive" cho web component (có đường lùi về SVG)
 packages/react       component <PenguinMascot> (Rive, lùi về web component)
-packages/flutter     states.dart sinh từ spec (widget Flutter làm ở giai đoạn 5)
+packages/flutter     widget Flutter `Mascot` (Rive, lùi về sprite sheet)
 art/plush            bộ phận PNG + fx SVG để nhập vào Rive (export-layers)
 rive/README.md       hợp đồng rig và hướng dẫn dựng bipbip.riv
 tools/               codegen, export-frames, export-layers, ...

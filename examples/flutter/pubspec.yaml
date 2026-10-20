@@ -19,7 +19,7 @@ dev_dependencies:
 flutter:
   uses-material-design: true
   assets:
-    # sprite sheet (đường lùi): npm run export:frames -- --out examples/flutter/assets/mascot
-    - assets/mascot/
-    # file Rive (khi đã có): bỏ comment dòng dưới và đặt rive/bipbip.riv vào assets/mascot/
-    # - assets/mascot/bipbip.riv
+    # file Rive (bản chép của rive/bipbip.riv)
+    - assets/mascot/bipbip.riv
+    # sprite sheet dự phòng: npm run export:frames -- --out examples/flutter/assets/mascot, rồi khai thư mục
+    # - assets/mascot/

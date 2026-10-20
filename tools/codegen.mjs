@@ -89,7 +89,9 @@ ${variants.join(',\n')};
 
 const String kRiveFile = '${spec.rive.file}';
 const String kRiveStateMachine = '${spec.rive.stateMachine}';
-const String kRiveDoneEvent = '${spec.rive.doneEvent}';
+const String kRiveViewModel = '${spec.rive.viewModel}';
+const List<String> kRiveDoneStates = [${spec.rive.doneStates.map((s) => `'${s}'`).join(', ')}];
+const String kRiveCapInput = '${spec.rive.capInput.name}';
 `;
 }
 

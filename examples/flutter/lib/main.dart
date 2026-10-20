@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:penguin_mascot/penguin_mascot.dart';
 
 void main() {
-  // Sprite sheet là đường lùi, luôn bật. Khi đã có file .riv thì bỏ comment dòng riveAsset
-  // (và dòng assets tương ứng trong pubspec.yaml).
-  MascotConfig.spriteAssetBase = 'assets/mascot';
-  // MascotConfig.riveAsset = 'assets/mascot/bipbip.riv';
+  // Rive là chính. Muốn có sprite sheet dự phòng: npm run export:frames -- --out examples/flutter/assets/mascot
+  // rồi bỏ comment dòng dưới (và khai thư mục trong pubspec.yaml).
+  MascotConfig.riveAsset = 'assets/mascot/bipbip.riv';
+  // MascotConfig.spriteAssetBase = 'assets/mascot';
   runApp(const ExampleApp());
 }
 
@@ -32,6 +32,7 @@ class _DemoPageState extends State<DemoPage> {
   final _log = <String>[];
   String _mode = 'đang chạy';
   bool _reduce = false;
+  bool _cap = false;
 
   @override
   void dispose() {
@@ -54,6 +55,7 @@ class _DemoPageState extends State<DemoPage> {
               child: Mascot(
                 controller: _controller,
                 size: 220,
+                cap: _cap,
                 onDone: (s) => setState(() => _log.insert(0, 'xong: ${s.name}')),
                 onFallback: (e) => setState(() => _mode = 'lùi về sprite sheet ($e)'),
               ),
@@ -73,6 +75,11 @@ class _DemoPageState extends State<DemoPage> {
                     onSelected: (_) => setState(() => _controller.play(s)),
                   ),
               ],
+            ),
+            SwitchListTile(
+              title: const Text('Đội mũ tốt nghiệp'),
+              value: _cap,
+              onChanged: (v) => setState(() => _cap = v),
             ),
             SwitchListTile(
               title: const Text('Giảm chuyển động'),

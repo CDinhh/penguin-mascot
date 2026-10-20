@@ -49,4 +49,6 @@ enum MascotVariant {
 
 const String kRiveFile = 'rive/bipbip.riv';
 const String kRiveStateMachine = 'Main';
-const String kRiveDoneEvent = 'done';
+const String kRiveViewModel = 'Mascot';
+const List<String> kRiveDoneStates = ['idle', 'think', 'sleep_start', 'dance_start', 'walk_start', 'talk'];
+const String kRiveCapInput = 'cap';

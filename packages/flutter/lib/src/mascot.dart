@@ -30,6 +30,7 @@ class Mascot extends StatefulWidget {
     this.state = MascotState.idle,
     this.size = 200,
     this.variant = MascotVariant.plush,
+    this.cap = false,
     this.onDone,
     this.replayKey,
     this.controller,
@@ -44,6 +45,9 @@ class Mascot extends StatefulWidget {
   /// Chiều rộng (logical pixel). Chiều cao theo tỉ lệ artboard (200x240) hoặc khung sprite.
   final double size;
   final MascotVariant variant;
+
+  /// Đội mũ tốt nghiệp (chỉ khi vẽ bằng Rive; sprite sheet không có mũ).
+  final bool cap;
 
   /// Animation một lần đã xong.
   final ValueChanged<MascotState>? onDone;
@@ -164,6 +168,7 @@ class _MascotState extends State<Mascot> {
           token: _token,
           size: widget.size,
           reduceMotion: reduce,
+          cap: widget.cap,
           onDone: done,
           onError: _onViewError,
         );

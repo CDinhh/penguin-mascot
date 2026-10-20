@@ -105,7 +105,9 @@ Mọi package và mọi tool đọc từ file này. Ví dụ:
     "file": "rive/bipbip.riv",
     "artboards": { "plush": "BipBip Plush" },
     "stateMachine": "Main",
-    "doneEvent": "done",
+    "viewModel": "Mascot",
+    "doneStates": ["idle", "think", "sleep_start", "dance_start", "walk_start", "talk"],
+    "capInput": { "type": "boolean", "name": "cap" },
     "extraInputs": [
       { "type": "number", "name": "lookX", "min": -1, "max": 1 },
       { "type": "number", "name": "lookY", "min": -1, "max": 1 }
@@ -180,8 +182,8 @@ cách dùng; `<penguin-mascot variant="plush">` viết trong HTML hiện đúng 
 2. `rive/README.md`: hợp đồng rig cho người dựng:
    - Artboard: `BipBip Plush`, kích thước 200x240.
    - Bone: `root, body, head, wing_l, wing_r, foot_l, foot_r, eye_l, eye_r`.
-   - State machine `Main`: input số `mood`, trigger theo spec, input số `lookX`, `lookY`.
-   - Mỗi trigger chạy animation một lần rồi về layer `mood`, phát event `done`.
+   - State machine `Main` điều khiển bằng view model `Mascot`: `mood` (số), trigger theo spec, `cap` (boolean), `lookX`, `lookY`.
+   - Mỗi trigger chạy animation một lần rồi về trạng thái lặp theo `mood`; runtime nhận biết xong qua đổi state (web) hoặc thời lượng (Flutter).
    - Hiệu ứng (pháo giấy, tim, Zzz, nước mắt, lửa) là layer riêng, ẩn mặc định.
    - Ngân sách: file `.riv` dưới 600KB (plush là raster).
    - Bảng trạng thái (copy từ README chính) để người dựng bám theo nhịp và thời lượng.
@@ -200,7 +202,7 @@ Agent không làm được bước này: file `.riv` chỉ tạo được trong 
 3. Xuất `rive/bipbip.riv`.
 
 **Tiêu chí xong:** mở `bipbip.riv` trong Rive editor thấy đủ input theo spec; chạy
-từng trigger thì về lại `idle` và có event `done`.
+từng trigger thì về lại `idle`.
 
 ### Giai đoạn 4: runtime Web và React (agent tự làm, sau khi có `.riv`)
 
@@ -258,7 +260,7 @@ chạy đúng `wave` và `sad`; kích thước asset giảm từ khoảng 3MB xu
 | --- | --- |
 | Lông bản plush làm bằng filter; Rive không có filter đó | Nướng lông vào PNG từng bộ phận rồi rig bằng bone/mesh. Viền lông có thể lộ đường nối ở khớp: chồng lớp và chừa lề. |
 | Package `rive` cho Flutter: bản mới nhất 0.14 (runtime `rive_native`, nhanh nhất) cần **Dart ≥ 3.6**; app PRM393 đang khóa Dart `>=2.17.0 <3.0.0` | Xem quyết định ở mục 8. Bản `rive` 0.13.x chạy với Dart 2.17 nhưng là runtime cũ. |
-| Runtime Rive web (2.45) đánh dấu **deprecated** việc đọc `stateMachineInputs` và nghe Rive Event ở runtime, khuyên dùng data binding (view model). Hiện vẫn chạy | Hợp đồng rig dùng input + event `done` như plan. Phần gọi nằm gọn trong `RiveDriver` (web) và `PenguinMascot.tsx` (React) nên đổi sang data binding là sửa cục bộ; nên chốt hướng này với người dựng `.riv` trước khi dựng. Có thời gian chờ dự phòng khi thiếu event `done`. |
+| Runtime Rive web (2.45) đánh dấu **deprecated** việc đọc `stateMachineInputs` và nghe Rive Event ở runtime, khuyên dùng data binding (view model). Hiện vẫn chạy | **Đã chốt:** hợp đồng rig dùng view model `Mascot` (data binding) cho `mood`, trigger và `cap`, vì MCP/editor không gắn điều kiện lên input legacy. Rive Event không tạo được qua MCP nên không có event `done`: web và React nghe đổi state của state machine (`StateChange`, cũng đang bị đánh dấu deprecated), Flutter báo xong theo `durationMs`; đều có đồng hồ dự phòng. |
 | Cần người dựng animation trong Rive editor | Giai đoạn 0 đến 2 làm trước, không phụ thuộc; app tiếp tục dùng sprite sheet cho tới giai đoạn 6. |
 | Hai variant làm gấp đôi công dựng | Đã chốt: bỏ `classic`, chỉ làm `plush`. |
 

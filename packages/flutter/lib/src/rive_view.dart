@@ -5,12 +5,14 @@ import 'package:rive/rive.dart' as rive;
 
 import 'states.dart';
 
-/// Chờ thêm sau `durationMs` trước khi coi là xong, phòng file .riv quên phát event `done`.
-const Duration kDoneSlack = Duration(milliseconds: 600);
+/// Chờ thêm sau `durationMs` trước khi báo xong: state machine vào state của trạng thái ở khung kế tiếp sau khi bắn trigger.
+/// (Rive Flutter không còn cho nghe event hay đổi state một cách công khai, nên báo xong bằng đồng hồ theo thời lượng trong spec.)
+const Duration kDoneSlack = Duration(milliseconds: 100);
 
 /// Vẽ [Mascot] bằng Rive: một artboard instance riêng cho mỗi widget, dùng chung `rive.File`.
 ///
-/// Trạng thái lặp đặt input `mood`; trạng thái một lần bắn trigger cùng tên rồi chờ event `done`.
+/// Trạng thái lặp đặt property `mood` của view model; trạng thái một lần bắn trigger cùng tên rồi báo xong sau
+/// `durationMs` của spec (file .riv chạy đúng thời lượng đó).
 /// Tạm dừng khi `TickerMode` tắt (route bị che) hoặc giảm chuyển động.
 class RiveMascotView extends StatefulWidget {
   const RiveMascotView({
@@ -21,6 +23,7 @@ class RiveMascotView extends StatefulWidget {
     required this.token,
     required this.size,
     required this.reduceMotion,
+    this.cap = false,
     required this.onDone,
     required this.onError,
   });
@@ -33,6 +36,9 @@ class RiveMascotView extends StatefulWidget {
   final int token;
   final double size;
   final bool reduceMotion;
+
+  /// Đội mũ tốt nghiệp (property `cap` của view model).
+  final bool cap;
   final void Function(MascotState state) onDone;
   final void Function(Object error) onError;
 
@@ -42,8 +48,9 @@ class RiveMascotView extends StatefulWidget {
 
 class _RiveMascotViewState extends State<RiveMascotView> {
   rive.RiveWidgetController? _controller;
-  rive.NumberInput? _mood;
-  final Map<String, rive.TriggerInput> _triggers = {};
+  rive.ViewModelInstanceNumber? _mood;
+  rive.ViewModelInstanceBoolean? _cap;
+  final Map<String, rive.ViewModelInstanceTrigger> _triggers = {};
   ({MascotState state, Timer timer})? _pending;
   bool _tickerOn = true;
 
@@ -62,9 +69,7 @@ class _RiveMascotViewState extends State<RiveMascotView> {
     _apply(widget.target);
   }
 
-  // Dùng input của state machine theo hợp đồng trong spec (Rive đánh dấu deprecated, khuyên dùng data binding;
-  // phần này gom lại một chỗ để đổi sang data binding sau này khi chốt hướng với người dựng file .riv).
-  // ignore_for_file: deprecated_member_use
+  // Điều khiển bằng view model `Mascot` (instance mặc định của artboard) theo hợp đồng trong spec.
   void _setup() {
     final c = rive.RiveWidgetController(
       widget.file,
@@ -72,12 +77,12 @@ class _RiveMascotViewState extends State<RiveMascotView> {
       stateMachineSelector: rive.StateMachineSelector.byName(kRiveStateMachine),
     );
     _controller = c;
-    final sm = c.stateMachine;
+    final vmi = c.dataBind(rive.DataBind.auto());
     final missing = <String>[];
-    _mood = sm.number('mood');
+    _mood = vmi.number('mood');
     if (_mood == null) missing.add('mood');
     for (final s in MascotState.values.where((s) => s.isTrigger)) {
-      final t = sm.trigger(s.riveInput);
+      final t = vmi.trigger(s.riveInput);
       if (t == null) {
         missing.add(s.riveInput);
       } else {
@@ -87,11 +92,8 @@ class _RiveMascotViewState extends State<RiveMascotView> {
     if (missing.isNotEmpty) {
       throw StateError('File .riv thiếu input: ${missing.join(', ')}');
     }
-    sm.addEventListener(_onEvent);
-  }
-
-  void _onEvent(rive.Event event) {
-    if (event.name == kRiveDoneEvent) _finish();
+    _cap = vmi.boolean(kRiveCapInput);
+    _cap?.value = widget.cap;
   }
 
   void _finish() {
@@ -116,7 +118,7 @@ class _RiveMascotViewState extends State<RiveMascotView> {
     }
     _pending?.timer.cancel();
     _pending = (state: s, timer: Timer(s.duration + kDoneSlack, _finish));
-    _triggers[s.riveInput]!.fire();
+    _triggers[s.riveInput]!.trigger();
   }
 
   @override
@@ -125,6 +127,7 @@ class _RiveMascotViewState extends State<RiveMascotView> {
     if (_controller == null) return;
     if (old.token != widget.token || old.target != widget.target) _apply(widget.target);
     if (old.reduceMotion != widget.reduceMotion) _syncActive();
+    if (old.cap != widget.cap) _cap?.value = widget.cap;
   }
 
   @override
@@ -146,7 +149,6 @@ class _RiveMascotViewState extends State<RiveMascotView> {
     _pending?.timer.cancel();
     final c = _controller;
     if (c != null) {
-      c.stateMachine.removeEventListener(_onEvent);
       c.dispose();
     }
     super.dispose();

@@ -40,9 +40,12 @@ export function createRiveRenderer(root, ctx, deps = { Rive, EventType }) {
   let driver;
   const sync = () => driver && driver.setPaused(!visible || document.hidden || !!(reduce && reduce.matches));
 
+  // accessory="cap" của web component -> property `cap` của view model
+  const wantsCap = () => /(^|\s)cap(\s|$)/.test(host.getAttribute('accessory') || '');
   driver = new RiveDriver({
     ...deps,
     canvas,
+    cap: wantsCap(),
     src: host.getAttribute('rive-src') || config.src || SPEC.rive.file,
     variant: ctx.variant,
     onError: ctx.fail,
@@ -56,6 +59,8 @@ export function createRiveRenderer(root, ctx, deps = { Rive, EventType }) {
   io && io.observe(host);
   const ro = typeof ResizeObserver === 'function' ? new ResizeObserver(() => driver.resize()) : null;
   ro && ro.observe(host);
+  const mo = typeof MutationObserver === 'function' ? new MutationObserver(() => driver.setCap(wantsCap())) : null;
+  mo && mo.observe(host, { attributes: true, attributeFilter: ['accessory'] });
   document.addEventListener('visibilitychange', sync);
   reduce && reduce.addEventListener('change', sync);
 
@@ -64,6 +69,7 @@ export function createRiveRenderer(root, ctx, deps = { Rive, EventType }) {
     destroy() {
       io && io.disconnect();
       ro && ro.disconnect();
+      mo && mo.disconnect();
       document.removeEventListener('visibilitychange', sync);
       reduce && reduce.removeEventListener('change', sync);
       driver.destroy();
