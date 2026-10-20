@@ -3,14 +3,19 @@
   "private": true,
   "version": "1.0.0",
   "description": "BipBip, linh vật chim cánh cụt cho app học tập (monorepo: web, React, Flutter)",
-  "workspaces": ["packages/*"],
+  "workspaces": [
+    "packages/*"
+  ],
   "scripts": {
     "test": "node --test \"test/*.test.mjs\"",
     "codegen": "node tools/codegen.mjs",
     "codegen:check": "node tools/codegen.mjs --check",
     "sync:root": "node tools/sync-root.mjs",
-    "export:frames": "node tools/export-frames.mjs"
+    "export:frames": "node tools/export-frames.mjs",
+    "export:layers": "node tools/export-layers.mjs"
   },
-  "engines": { "node": ">=22" },
+  "engines": {
+    "node": ">=22"
+  },
   "license": "MIT"
 }

@@ -1,0 +1,309 @@
+{
+  "variant": "plush",
+  "artboard": {
+    "width": 200,
+    "height": 240
+  },
+  "scale": 3,
+  "note": "x, y, width, height và pivot tính theo đơn vị artboard 200x240; PNG ở 3x. parts xếp từ sau ra trước. visibleAtRest=false: biểu cảm phụ, ẩn mặc định.",
+  "parts": [
+    {
+      "name": "shadow",
+      "file": "shadow.png",
+      "x": 47.33,
+      "y": 219.33,
+      "width": 105.33,
+      "height": 15.33,
+      "pivot": [
+        100,
+        227
+      ],
+      "visibleAtRest": true
+    },
+    {
+      "name": "body",
+      "file": "body.png",
+      "x": 30,
+      "y": 115.33,
+      "width": 140,
+      "height": 112.67,
+      "pivot": [
+        100,
+        224
+      ],
+      "visibleAtRest": true
+    },
+    {
+      "name": "head",
+      "file": "head.png",
+      "x": 16.33,
+      "y": 15.67,
+      "width": 167.33,
+      "height": 129,
+      "pivot": [
+        100,
+        135
+      ],
+      "visibleAtRest": true
+    },
+    {
+      "name": "cap",
+      "file": "cap.png",
+      "x": 51,
+      "y": 10.33,
+      "width": 97.67,
+      "height": 47.67,
+      "pivot": [
+        100,
+        50
+      ],
+      "visibleAtRest": false
+    },
+    {
+      "name": "brow_l",
+      "file": "brow_l.png",
+      "x": 55,
+      "y": 79.67,
+      "width": 18,
+      "height": 6.33,
+      "pivot": [
+        64,
+        83
+      ],
+      "visibleAtRest": false
+    },
+    {
+      "name": "brow_r",
+      "file": "brow_r.png",
+      "x": 127,
+      "y": 79.67,
+      "width": 18,
+      "height": 6.33,
+      "pivot": [
+        136,
+        83
+      ],
+      "visibleAtRest": false
+    },
+    {
+      "name": "eye_l",
+      "file": "eye_l.png",
+      "x": 56.67,
+      "y": 86.67,
+      "width": 14.67,
+      "height": 14.67,
+      "pivot": [
+        64,
+        94
+      ],
+      "visibleAtRest": true
+    },
+    {
+      "name": "eye_r",
+      "file": "eye_r.png",
+      "x": 128.67,
+      "y": 86.67,
+      "width": 14.67,
+      "height": 14.67,
+      "pivot": [
+        136,
+        94
+      ],
+      "visibleAtRest": true
+    },
+    {
+      "name": "eyes_happy",
+      "file": "eyes_happy.png",
+      "x": 54.33,
+      "y": 89.67,
+      "width": 91.33,
+      "height": 9.67,
+      "pivot": [
+        100,
+        94
+      ],
+      "visibleAtRest": false
+    },
+    {
+      "name": "eyes_closed",
+      "file": "eyes_closed.png",
+      "x": 54.67,
+      "y": 90.67,
+      "width": 90.67,
+      "height": 8,
+      "pivot": [
+        100,
+        94
+      ],
+      "visibleAtRest": false
+    },
+    {
+      "name": "eyes_heart",
+      "file": "eyes_heart.png",
+      "x": 56.67,
+      "y": 86,
+      "width": 86.67,
+      "height": 14.33,
+      "pivot": [
+        100,
+        94
+      ],
+      "visibleAtRest": false
+    },
+    {
+      "name": "cheek_l",
+      "file": "cheek_l.png",
+      "x": 44.33,
+      "y": 103,
+      "width": 19.33,
+      "height": 12,
+      "pivot": [
+        54,
+        109
+      ],
+      "visibleAtRest": true
+    },
+    {
+      "name": "cheek_r",
+      "file": "cheek_r.png",
+      "x": 136.33,
+      "y": 103,
+      "width": 19.33,
+      "height": 12,
+      "pivot": [
+        146,
+        109
+      ],
+      "visibleAtRest": true
+    },
+    {
+      "name": "mouth",
+      "file": "mouth.png",
+      "x": 90.33,
+      "y": 105.33,
+      "width": 19.33,
+      "height": 13.33,
+      "pivot": [
+        100,
+        107
+      ],
+      "visibleAtRest": false
+    },
+    {
+      "name": "beak_bot",
+      "file": "beak_bot.png",
+      "x": 84.33,
+      "y": 102.33,
+      "width": 31.33,
+      "height": 17,
+      "pivot": [
+        100,
+        107
+      ],
+      "visibleAtRest": true
+    },
+    {
+      "name": "beak_top",
+      "file": "beak_top.png",
+      "x": 77,
+      "y": 87.33,
+      "width": 46,
+      "height": 23,
+      "pivot": [
+        100,
+        107
+      ],
+      "visibleAtRest": true
+    },
+    {
+      "name": "wing_l",
+      "file": "wing_l.png",
+      "x": 10.67,
+      "y": 136.67,
+      "width": 43.33,
+      "height": 48,
+      "pivot": [
+        41,
+        149
+      ],
+      "visibleAtRest": true
+    },
+    {
+      "name": "wing_r",
+      "file": "wing_r.png",
+      "x": 145.33,
+      "y": 136.67,
+      "width": 44,
+      "height": 47.67,
+      "pivot": [
+        159,
+        149
+      ],
+      "visibleAtRest": true
+    },
+    {
+      "name": "foot_l",
+      "file": "foot_l.png",
+      "x": 52,
+      "y": 200.67,
+      "width": 38.67,
+      "height": 28,
+      "pivot": [
+        71,
+        227
+      ],
+      "visibleAtRest": true
+    },
+    {
+      "name": "foot_r",
+      "file": "foot_r.png",
+      "x": 109.33,
+      "y": 201,
+      "width": 39,
+      "height": 27.67,
+      "pivot": [
+        129,
+        227
+      ],
+      "visibleAtRest": true
+    }
+  ],
+  "fx": [
+    {
+      "name": "flame",
+      "file": "fx/flame.svg"
+    },
+    {
+      "name": "tear",
+      "file": "fx/tear.svg"
+    },
+    {
+      "name": "sweat",
+      "file": "fx/sweat.svg"
+    },
+    {
+      "name": "zzz",
+      "file": "fx/zzz.svg"
+    },
+    {
+      "name": "question",
+      "file": "fx/question.svg"
+    },
+    {
+      "name": "exclaim",
+      "file": "fx/exclaim.svg"
+    },
+    {
+      "name": "hearts",
+      "file": "fx/hearts.svg"
+    },
+    {
+      "name": "sparkles",
+      "file": "fx/sparkles.svg"
+    },
+    {
+      "name": "confetti",
+      "file": "fx/confetti.svg"
+    }
+  ]
+}

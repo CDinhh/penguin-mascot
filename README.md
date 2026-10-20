@@ -120,6 +120,10 @@ export/plush/
 
 Ví dụ Flutter nằm trong repo PRM393_G6_FE (`Mascot` trong `lib/widgets/`). Nếu cần hình vector có thể chỉnh được trong editor, có thể nhập `penguin.svg` vào **Rive** (các bộ phận đã tách lớp sẵn) rồi dựng lại animation theo bảng ở trên.
 
+## Dựng linh vật trong Rive
+
+`npm run export:layers` tách từng bộ phận của bản bông ra PNG 3x trong suốt (`art/plush/`, lông đã nướng sẵn) cùng `parts.json`, bảng vị trí `parts.md` và hiệu ứng SVG (`art/plush/fx/`); thêm `-- --verify` để ghép lại và so với hình gốc. Hợp đồng rig và hướng dẫn dựng `bipbip.riv` ở [`rive/README.md`](rive/README.md).
+
 ## Cấu trúc monorepo
 
 ```text
@@ -127,7 +131,9 @@ spec/mascot.json     nguồn sự thật: trạng thái, thời lượng, loop, 
 packages/web         web component <penguin-mascot> (@prm393/penguin-mascot, chưa publish)
 packages/react       states.ts sinh từ spec (component React làm ở giai đoạn 4)
 packages/flutter     states.dart sinh từ spec (widget Flutter làm ở giai đoạn 5)
-tools/               codegen, export-frames, ...
+art/plush            bộ phận PNG + fx SVG để nhập vào Rive (export-layers)
+rive/README.md       hợp đồng rig và hướng dẫn dựng bipbip.riv
+tools/               codegen, export-frames, export-layers, ...
 examples/web         trang demo
 docs/PLAN.md         kế hoạch nhiều nền tảng
 ```

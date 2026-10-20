@@ -1,0 +1,158 @@
+<!doctype html>
+<meta charset="utf-8">
+<style>
+  html, body { margin: 0; background: transparent; overflow: hidden; }
+  #w { padding: var(--pad); width: max-content; }
+</style>
+<script src="../packages/web/penguin.js"></script>
+<div id="w"><penguin-mascot id="pg" size="200"></penguin-mascot></div>
+<script>
+  // Trang phụ trợ cho tools/export-layers.mjs: tách từng bộ phận của linh vật ra để chụp, rồi ghép lại để so sánh.
+  const PAD = 30; // lề (đơn vị viewBox) chừa cho lông, pháo giấy... tràn ra ngoài khung 200x240
+  document.getElementById('w').style.setProperty('--pad', PAD + 'px');
+  const frame = () => new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
+  const pg = document.getElementById('pg');
+  const svg = () => pg.shadowRoot.querySelector('svg');
+
+  // Bộ phận, theo thứ tự vẽ từ sau ra trước (đúng thứ tự trong DOM của penguin.js).
+  // rest: hiện ở tư thế nghỉ (mặc định CSS); force: CSS đang ẩn bằng opacity/transform nên phải ép hiện khi chụp.
+  // pivot: tâm xoay gợi ý khi không đọc được từ CSS.
+  const PARTS = [
+    { name: 'shadow', sel: '.pg-shadow', rest: true, pivot: [100, 227] },
+    { name: 'body', sel: '.pg-bodyg > g:nth-child(1)', rest: true, pivot: [100, 224] },
+    { name: 'head', sel: '.pg-bodyg > g:nth-child(2)', rest: true, pivot: [100, 135] },
+    { name: 'cap', sel: '.pg-cap', force: true, pivot: [100, 50] },
+    { name: 'brow_l', sel: '.pg-brow-l', parentForce: '.pg-brows' },
+    { name: 'brow_r', sel: '.pg-brow-r', parentForce: '.pg-brows' },
+    { name: 'eye_l', sel: '.pg-eye-l', rest: true },
+    { name: 'eye_r', sel: '.pg-eye-r', rest: true },
+    { name: 'eyes_happy', sel: '.pg-eyes-happy', force: true, pivot: [100, 94] },
+    { name: 'eyes_closed', sel: '.pg-eyes-closed', force: true, pivot: [100, 94] },
+    { name: 'eyes_heart', sel: '.pg-eyes-heart', force: true, pivot: [100, 94] },
+    { name: 'cheek_l', sel: '.pg-cheek-l', rest: true },
+    { name: 'cheek_r', sel: '.pg-cheek-r', rest: true },
+    { name: 'mouth', sel: '.pg-mouth', force: true },
+    { name: 'beak_bot', sel: '.pg-beak-bot', rest: true },
+    { name: 'beak_top', sel: '.pg-beak-top', rest: true, pivot: [100, 107] },
+    { name: 'wing_l', sel: '.pg-wing-l', rest: true },
+    { name: 'wing_r', sel: '.pg-wing-r', rest: true },
+    { name: 'foot_l', sel: '.pg-foot-l', rest: true },
+    { name: 'foot_r', sel: '.pg-foot-r', rest: true },
+  ];
+
+  // Hiệu ứng: xuất dạng SVG (fill nằm sẵn trong thuộc tính nên không cần CSS).
+  const FX = [
+    { name: 'flame', sel: '.pg-flame', wrap: true, pivot: [100, 227] },
+    { name: 'tear', sel: '.pg-tear', wrap: true },
+    { name: 'sweat', sel: '.pg-sweat', wrap: true },
+    { name: 'zzz', sel: '.pg-zzz' },
+    { name: 'question', sel: '.pg-question' },
+    { name: 'exclaim', sel: '.pg-exclaim' },
+    { name: 'hearts', sel: '.pg-hearts' },
+    { name: 'sparkles', sel: '.pg-sparkles' },
+    { name: 'confetti', sel: '.pg-confettis' },
+  ];
+
+  // Chuẩn bị: variant plush, đứng yên (không animation), không chớp mắt.
+  window.prepare = async () => {
+    await customElements.whenDefined('penguin-mascot');
+    pg.variant = 'plush';
+    pg.removeAttribute('accessory');
+    svg().dataset.state = '';
+    const st = document.createElement('style');
+    st.textContent = '*{animation:none!important;transition:none!important}';
+    pg.shadowRoot.appendChild(st);
+    await frame();
+    const w = document.getElementById('w').getBoundingClientRect();
+    return { pad: PAD, width: Math.ceil(w.width), height: Math.ceil(w.height), parts: PARTS.map((p) => p.name) };
+  };
+
+  let undo = [];
+  function setStyle(el, props) {
+    const old = {};
+    for (const [k, v] of Object.entries(props)) { old[k] = el.style.getPropertyValue(k); el.style.setProperty(k, v, 'important'); }
+    undo.push(() => { for (const [k, v] of Object.entries(old)) v ? el.style.setProperty(k, v) : el.style.removeProperty(k); });
+  }
+  const reset = () => { undo.reverse().forEach((f) => f()); undo = []; };
+
+  // Chỉ hiện bộ phận `name`, ẩn mọi thứ còn lại (visibility kế thừa nên con của bộ phận vẫn hiện).
+  window.isolate = async (name) => {
+    reset();
+    const p = PARTS.find((x) => x.name === name);
+    const el = svg().querySelector(p.sel);
+    if (!el) throw new Error('Không thấy bộ phận ' + name);
+    setStyle(svg(), { visibility: 'hidden' });
+    // clipPath, mask, filter nằm trong <defs>: nếu cũng bị ẩn thì phần bị cắt (mặt trắng...) biến mất.
+    for (const d of svg().querySelectorAll('defs')) setStyle(d, { visibility: 'visible' });
+    setStyle(el, { visibility: 'visible' });
+    if (p.force) setStyle(el, { opacity: '1', transform: 'none' });
+    if (p.parentForce) setStyle(el.closest(p.parentForce), { opacity: '1' });
+    await frame();
+    // Tâm xoay lấy từ CSS của bản plush (px trong viewBox); không có thì dùng gợi ý.
+    const o = getComputedStyle(el).transformOrigin.split(' ').map(parseFloat);
+    const fromCss = o.length === 2 && o.every((n) => Number.isFinite(n)) && (o[0] !== 0 || o[1] !== 0) ? o : null;
+    return { pivot: p.pivot || fromCss, rest: !!p.rest };
+  };
+
+  window.showAll = async () => {
+    reset();
+    await frame();
+  };
+
+  window.fxList = () => FX.map((f) => f.name);
+  window.fxSvg = (name) => {
+    const f = FX.find((x) => x.name === name);
+    let el = svg().querySelector(f.sel);
+    if (f.wrap && el.parentElement.tagName.toLowerCase() === 'g' && el.parentElement.classList.length === 0) el = el.parentElement;
+    return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 240" width="200" height="240" overflow="visible">' + el.outerHTML + '</svg>';
+  };
+
+  // Cắt ảnh theo hộp bao của vùng có alpha > 0, trả về PNG + vị trí (pixel).
+  window.crop = (url, margin) => new Promise((resolve) => {
+    const img = new Image();
+    img.onload = () => {
+      const c = document.createElement('canvas');
+      c.width = img.width; c.height = img.height;
+      const g = c.getContext('2d');
+      g.drawImage(img, 0, 0);
+      const d = g.getImageData(0, 0, c.width, c.height).data;
+      let x0 = c.width, y0 = c.height, x1 = -1, y1 = -1;
+      for (let y = 0; y < c.height; y++) for (let x = 0; x < c.width; x++) {
+        if (d[(y * c.width + x) * 4 + 3] > 0) { if (x < x0) x0 = x; if (x > x1) x1 = x; if (y < y0) y0 = y; if (y > y1) y1 = y; }
+      }
+      if (x1 < 0) { resolve(null); return; }
+      x0 = Math.max(0, x0 - margin); y0 = Math.max(0, y0 - margin);
+      x1 = Math.min(c.width - 1, x1 + margin); y1 = Math.min(c.height - 1, y1 + margin);
+      const w = x1 - x0 + 1, h = y1 - y0 + 1;
+      const o = document.createElement('canvas');
+      o.width = w; o.height = h;
+      o.getContext('2d').drawImage(c, x0, y0, w, h, 0, 0, w, h);
+      resolve({ url: o.toDataURL('image/png'), x: x0, y: y0, w, h });
+    };
+    img.src = url;
+  });
+
+  const load = (src) => new Promise((res) => { const i = new Image(); i.onload = () => res(i); i.src = src; });
+
+  // Ghép các lớp (theo thứ tự đã cho) lên một canvas cỡ `w`x`h` pixel rồi so với ảnh tham chiếu `refUrl`.
+  // Trả về sai khác trung bình và lớn nhất trên mỗi kênh (0-255), sau khi trải lên nền trắng.
+  window.compareComposite = async (layers, refUrl, w, h) => {
+    const comp = document.createElement('canvas');
+    comp.width = w; comp.height = h;
+    const g = comp.getContext('2d');
+    for (const l of layers) g.drawImage(await load(l.url), l.x, l.y);
+    const ref = document.createElement('canvas');
+    ref.width = w; ref.height = h;
+    ref.getContext('2d').drawImage(await load(refUrl), 0, 0);
+    const flat = (c) => { const o = document.createElement('canvas'); o.width = w; o.height = h; const x = o.getContext('2d'); x.fillStyle = '#fff'; x.fillRect(0, 0, w, h); x.drawImage(c, 0, 0); return x.getImageData(0, 0, w, h).data; };
+    const a = flat(comp), b = flat(ref);
+    let sum = 0, max = 0, bad = 0;
+    for (let i = 0; i < a.length; i += 4) {
+      let m = 0;
+      for (let k = 0; k < 3; k++) { const dd = Math.abs(a[i + k] - b[i + k]); sum += dd; if (dd > m) m = dd; }
+      if (m > max) max = m;
+      if (m > 16) bad++;
+    }
+    return { mean: sum / (a.length / 4 * 3), max, badPixels: bad, pixels: a.length / 4 };
+  };
+</script>
