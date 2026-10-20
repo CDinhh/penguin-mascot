@@ -16,19 +16,19 @@ Hình đã được tách sẵn trong [`art/plush/`](../art/plush/) (lông đã 
 
 - Tên: **`BipBip Plush`**, kích thước **200 x 240**, gốc tọa độ ở góc trên trái, y hướng xuống.
 - Đặt mỗi ảnh bộ phận đúng chỗ theo [`parts.md`](../art/plush/parts.md): kích thước rộng x cao theo bảng (PNG là 3x nên thu về 33,33%), còn vị trí là `x`, `y` góc trên trái (hoặc “tâm x, tâm y” nếu Rive đặt theo tâm).
-- Thứ tự lớp từ sau ra trước giống thứ tự dòng trong `parts.md`: `shadow`, `body`, `head`, `tag`, `cap`, `brow_*`, `eye_*`, `eyes_*`, `cheek_*`, `mouth`, `beak_bot`, `beak_top`, `wing_*`, `foot_*`. Chân vẽ trên cùng, đè lên thân.
+- Thứ tự lớp từ sau ra trước giống thứ tự dòng trong `parts.md`: `shadow`, `body`, `strap`, `head`, `tag`, `cap`, `brow_*`, `eye_*`, `eyes_*`, `cheek_*`, `mouth`, `beak_bot`, `beak_top`, `wing_*`, `foot_*`. Chân vẽ trên cùng, đè lên thân.
 - Khi xếp xong, nhân vật ở tư thế nghỉ phải giống ảnh [`penguin-plush.svg`](../packages/web/penguin-plush.svg).
 
 ## 3. Bone
 
-Tên cố định: `root`, `body`, `head`, `tag`, `wing_l`, `wing_r`, `foot_l`, `foot_r`, `eye_l`, `eye_r`.
+Tên cố định: `root`, `body`, `head`, `tag`, `strap`, `wing_l`, `wing_r`, `foot_l`, `foot_r`, `eye_l`, `eye_r`.
 
 | Bone | Gắn vào | Điều khiển các ảnh | Tâm xoay (pivot, đơn vị artboard) |
 | --- | --- | --- | --- |
 | `root` | gốc | tất cả (nhảy, nghiêng cả người) | 100, 226 |
 | `body` | `root` | `body` | 100, 224 |
 | `head` | `body` | `head`, `cap`, `brow_*`, `eyes_*`, `cheek_*`, `mouth`, `beak_*` | 100, 135 (gợi ý) |
-| `tag` | `body` | `tag` (thẻ tên gỗ tròn, đường kính khoảng 32 đơn vị, mặt mờ, kèm quai da lộn nhô khỏi mép thẻ khoảng 1/6 đường kính, thẻ dính sát cằm và chồng lên lông cằm; lắc quanh lỗ) | 100, 142,2 |
+| `tag`, `strap` | `body` | `tag` (đĩa gỗ tròn, mặt mờ, đường kính khoảng 32 đơn vị, thẻ treo ngay dưới cằm trên bụng) và `strap` (dây da lộn đi vòng sau cổ, **nằm dưới lớp `head`** nên đầu che phần dây đi lên cổ, chỉ ló ra dưới mép cằm; không bao giờ nằm trên mặt hay cằm trắng); cả hai lắc cùng nhịp quanh lỗ treo | 100, 148,2 |
 | `eye_l`, `eye_r` | `head` | `eye_l`, `eye_r` (nhìn quanh, chớp mắt) | 64, 94 và 136, 94 |
 | `wing_l`, `wing_r` | `body` | `wing_l`, `wing_r` | 41, 149 và 159, 149 |
 | `foot_l`, `foot_r` | `root` | `foot_l`, `foot_r` | 71, 227 và 129, 227 |
@@ -80,7 +80,7 @@ Thời lượng một lần là **mili-giây**, khớp với web component (`ONE
 ## 6. Biểu cảm và hiệu ứng
 
 - Các lớp biểu cảm phụ ẩn mặc định (opacity 0) và được bật trong animation: `eyes_happy` (mắt cười), `eyes_closed` (nhắm mắt, ngủ), `eyes_heart` (mắt tim), `mouth` (miệng mở), `brow_*` (lông mày), `cap` (mũ, tùy chọn). Khi bật `eyes_*` thì ẩn `eye_l`, `eye_r`.
-- Thẻ tên (`tag`, đĩa tròn khắc chìm chữ BipBip và dấu chân, dây da lộn đi kèm trong cùng ảnh) lắc nhẹ quanh lỗ treo: `idle` và `talk` xoay khoảng ±7° chu kỳ 2,8 giây; `happy`, `celebrate`, `love`, `yes` xoay khoảng ±14° chu kỳ 0,6 giây (theo bản web). Các trạng thái khác để yên.
+- Thẻ tên (`tag`, đĩa tròn khắc chìm chữ BipBip và dấu chân) và dây `strap` lắc nhẹ cùng nhịp quanh lỗ treo: `idle` và `talk` xoay khoảng ±7° chu kỳ 2,8 giây; `happy`, `celebrate`, `love`, `yes` xoay khoảng ±14° chu kỳ 0,6 giây (theo bản web). Các trạng thái khác để yên.
 - Hiệu ứng từ `fx/*.svg` là layer riêng, **ẩn mặc định**, chỉ hiện trong animation tương ứng: `flame` (streak), `hearts` (love), `zzz` (sleep), `question` (think), `exclaim` (surprised), `sparkles` (celebrate), `confetti` (celebrate), `tear` (sad), `sweat`.
 - `flame` nằm **sau** nhân vật; các hiệu ứng khác nằm trước.
 

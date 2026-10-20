@@ -34,6 +34,19 @@
       "visibleAtRest": true
     },
     {
+      "name": "strap",
+      "file": "strap.png",
+      "x": 95.67,
+      "y": 132.67,
+      "width": 8.67,
+      "height": 17.67,
+      "pivot": [
+        100,
+        148.2
+      ],
+      "visibleAtRest": true
+    },
+    {
       "name": "head",
       "file": "head.png",
       "x": 16.33,
@@ -50,12 +63,12 @@
       "name": "tag",
       "file": "tag.png",
       "x": 83,
-      "y": 131.33,
+      "y": 142.67,
       "width": 35.67,
-      "height": 42,
+      "height": 36.67,
       "pivot": [
         100,
-        142.2
+        148.2
       ],
       "visibleAtRest": true
     },

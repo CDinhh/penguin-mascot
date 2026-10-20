@@ -19,9 +19,10 @@
   // pivot: tâm xoay gợi ý khi không đọc được từ CSS.
   const PARTS = [
     { name: 'shadow', sel: '.pg-shadow', rest: true, pivot: [100, 227] },
-    { name: 'body', sel: '.pg-bodyg > g:nth-child(1)', rest: true, pivot: [100, 224] },
-    { name: 'head', sel: '.pg-bodyg > g:nth-child(2)', rest: true, pivot: [100, 135] },
-    { name: 'tag', sel: '.pg-tag', rest: true, pivot: [100, 142.2] },
+    { name: 'body', sel: '.pg-torso', rest: true, pivot: [100, 224] },
+    { name: 'strap', sel: '.pg-strap', rest: true, pivot: [100, 148.2] },
+    { name: 'head', sel: '.pg-headg', rest: true, pivot: [100, 135] },
+    { name: 'tag', sel: '.pg-tag', rest: true, pivot: [100, 148.2] },
     { name: 'cap', sel: '.pg-cap', force: true, pivot: [100, 50] },
     { name: 'brow_l', sel: '.pg-brow-l', parentForce: '.pg-brows' },
     { name: 'brow_r', sel: '.pg-brow-r', parentForce: '.pg-brows' },

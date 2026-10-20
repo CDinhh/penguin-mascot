@@ -149,8 +149,8 @@
     '.pg[data-state="idle"] .pg-wing-r{animation:pg-sway-r 2.8s ease-in-out infinite}',
 
     /* ---------- thẻ tên lắc nhẹ theo nhịp ---------- */
-    '.pg[data-state="idle"] .pg-tag,.pg[data-state="talk"] .pg-tag{animation:pg-tag-swing 2.8s ease-in-out infinite}',
-    '.pg[data-state="happy"] .pg-tag,.pg[data-state="celebrate"] .pg-tag,.pg[data-state="love"] .pg-tag,.pg[data-state="yes"] .pg-tag{animation:pg-tag-swing-lg .6s ease-in-out infinite}',
+    '.pg[data-state="idle"] .pg-tag,.pg[data-state="talk"] .pg-tag,.pg[data-state="idle"] .pg-strap,.pg[data-state="talk"] .pg-strap{animation:pg-tag-swing 2.8s ease-in-out infinite}',
+    '.pg[data-state="happy"] .pg-tag,.pg[data-state="celebrate"] .pg-tag,.pg[data-state="love"] .pg-tag,.pg[data-state="yes"] .pg-tag,.pg[data-state="happy"] .pg-strap,.pg[data-state="celebrate"] .pg-strap,.pg[data-state="love"] .pg-strap,.pg[data-state="yes"] .pg-strap{animation:pg-tag-swing-lg .6s ease-in-out infinite}',
 
     /* ---------- WAVE: vẫy tay chào ---------- */
     '.pg[data-state="wave"] .pg-wing-r{animation:pg-wave 2s ease-in-out both}',
@@ -708,15 +708,22 @@
   var character =
     '<g class="pg-bodyg">' +
       // body
-      '<g filter="' + u('fuzz') + '">' +
+      '<g class="pg-torso" filter="' + u('fuzz') + '">' +
         '<path d="' + BODY_D + '" fill="' + u('body') + '"/>' +
         blob(100, 186, 46, 36, 'belly') +
         blob(78, 200, 14, 10, 'mot') + blob(121, 176, 12, 9, 'mot') + blob(106, 212, 16, 7, 'mot') +
         strands(fringe(BODY, 34, 0.8, 2), '#A9B3C1', 1.2) +
         blob(100, 142, 64, 13, 'shade') +
       '</g>' +
+      // dây da lộn của thẻ: nằm SAU đầu (đầu che phần dây đi lên cổ), chỉ ló ra dưới mép cằm; cùng nhịp lắc với thẻ
+      '<g class="pg-strap"><g transform="translate(0 -3)" fill="none" stroke-linecap="round">' +
+        '<path d="M99.4 151.4 C99 147.6 97.8 143 97.6 137.6" stroke="#6E4724" stroke-width="2.4"/>' +
+        '<path d="M100.6 151.4 C101 147.6 102.2 143 102.4 137.6" stroke="#6E4724" stroke-width="2.4"/>' +
+        '<path d="M99.4 151.4 C99 147.6 97.8 143 97.6 137.6" stroke="#9A6B3A" stroke-width=".9" opacity=".7"/>' +
+        '<path d="M100.6 151.4 C101 147.6 102.2 143 102.4 137.6" stroke="#9A6B3A" stroke-width=".9" opacity=".7"/>' +
+      '</g></g>' +
       // head
-      '<g filter="' + u('fuzz') + '">' +
+      '<g class="pg-headg" filter="' + u('fuzz') + '">' +
         '<path d="' + HEAD_D + '" fill="' + u('head') + '"/>' +
         '<g clip-path="' + u('headclip') + '">' +
           blob(100, 46, 58, 26, 'dark') + blob(100, 74, 20, 26, 'dark') +
@@ -731,13 +738,9 @@
         '<g transform="translate(0 4)"><path d="' + tufts + '" fill="#5A6475"/>' +
         strands('M97 29l-4 -10M101 28l1 -11M104 30l5 -9M92 31l-7 -6', '#5A6475', 1.6) + '</g>' +
       '</g>' +
-      // thẻ tên gỗ tròn, mặt mờ (không bóng), khắc chìm; quai da lộn nhô khỏi mép thẻ khoảng 1/6 đường kính, thẻ dính sát cằm và chồng lên lông cằm; lắc quanh lỗ (100 142.2)
-      '<g class="pg-tag"><g transform="translate(0 -9)">' +
+      // thẻ tên gỗ tròn, mặt mờ (không bóng), khắc chìm; thẻ treo ngay dưới cằm; dây da lộn là lớp riêng (pg-strap) nằm sau đầu; lắc quanh lỗ (100 148.2)
+      '<g class="pg-tag"><g transform="translate(0 -3)">' +
         '<ellipse cx="101.4" cy="165.4" rx="16.3" ry="16" fill="#3E4757" opacity=".15"/>' +
-        '<g fill="none" stroke="#6E4724" stroke-width="2.4" stroke-linecap="round">' +
-          '<path d="M99.3 151.4 C97.1 148.6 97.7 144.6 100.3 142.4"/>' +
-          '<path d="M100.7 151.4 C102.9 148.6 102.3 144.6 99.7 142.4"/>' +
-        '</g>' +
         '<circle cx="100" cy="164" r="16.2" fill="#7A4520"/>' +
         '<circle cx="100" cy="163.6" r="15.4" fill="#B07846"/>' +
         // vân gỗ rất nhẹ
@@ -748,6 +751,8 @@
         // vòng viền chìm sát mép
         '<circle cx="100" cy="163.6" r="13.2" fill="none" stroke="#7E4A25" stroke-width=".9" opacity=".85"/>' +
         '<circle cx="100" cy="151.2" r="1.7" fill="#4A2A12"/>' +
+        // đoạn dây đi qua lỗ, vắt lên mép trên của thẻ
+        '<path d="M99.5 151.6 C99.3 150 99.4 148.6 99.8 147.2 M100.5 151.6 C100.7 150 100.6 148.6 100.2 147.2" fill="none" stroke="#6E4724" stroke-width="1.5" stroke-linecap="round"/>' +
         // họa tiết dấu chân và chữ khắc chìm
         '<g transform="translate(107.4 156.2) rotate(14) scale(.5)">' + TAG_PAW + '</g>' +
         '<g transform="translate(94.6 173.6) rotate(-16) scale(.62)">' + TAG_PAW + '</g>' +
@@ -796,7 +801,7 @@
     '.pg-cheek-l{transform-origin:54px 109px}.pg-cheek-r{transform-origin:146px 109px}' +
     '.pg-brow-l{transform-origin:64px 83px}.pg-brow-r{transform-origin:136px 83px}' +
     '.pg-face{transform-origin:100px 100px}' +
-    '.pg-tag{transform-origin:100px 142.2px}';
+    '.pg-tag,.pg-strap{transform-origin:100px 148.2px}';
 
   P.registerVariant('plush', {
     label: 'Plush',
