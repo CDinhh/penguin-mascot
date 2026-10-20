@@ -731,12 +731,12 @@
         '<g transform="translate(0 4)"><path d="' + tufts + '" fill="#5A6475"/>' +
         strands('M97 29l-4 -10M101 28l1 -11M104 30l5 -9M92 31l-7 -6', '#5A6475', 1.6) + '</g>' +
       '</g>' +
-      // thẻ tên gỗ tròn, mặt mờ (không bóng), khắc chìm; quai da lộn rất ngắn luồn qua lỗ ở đỉnh, thẻ sát cằm; lắc quanh lỗ (100 145.6)
-      '<g class="pg-tag"><g transform="translate(0 -5.6)">' +
+      // thẻ tên gỗ tròn, mặt mờ (không bóng), khắc chìm; quai da lộn nhô khỏi mép thẻ khoảng 1/6 đường kính, thẻ dính sát cằm và chồng lên lông cằm; lắc quanh lỗ (100 142.2)
+      '<g class="pg-tag"><g transform="translate(0 -9)">' +
         '<ellipse cx="101.4" cy="165.4" rx="16.3" ry="16" fill="#3E4757" opacity=".15"/>' +
         '<g fill="none" stroke="#6E4724" stroke-width="2.4" stroke-linecap="round">' +
-          '<path d="M99.3 151.4 C97.3 149.2 97.9 146.6 100.4 145.2"/>' +
-          '<path d="M100.7 151.4 C102.7 149.2 102.1 146.6 99.6 145.2"/>' +
+          '<path d="M99.3 151.4 C97.1 148.6 97.7 144.6 100.3 142.4"/>' +
+          '<path d="M100.7 151.4 C102.9 148.6 102.3 144.6 99.7 142.4"/>' +
         '</g>' +
         '<circle cx="100" cy="164" r="16.2" fill="#7A4520"/>' +
         '<circle cx="100" cy="163.6" r="15.4" fill="#B07846"/>' +
@@ -796,7 +796,7 @@
     '.pg-cheek-l{transform-origin:54px 109px}.pg-cheek-r{transform-origin:146px 109px}' +
     '.pg-brow-l{transform-origin:64px 83px}.pg-brow-r{transform-origin:136px 83px}' +
     '.pg-face{transform-origin:100px 100px}' +
-    '.pg-tag{transform-origin:100px 145.6px}';
+    '.pg-tag{transform-origin:100px 142.2px}';
 
   P.registerVariant('plush', {
     label: 'Plush',

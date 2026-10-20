@@ -28,7 +28,7 @@ Tên cố định: `root`, `body`, `head`, `tag`, `wing_l`, `wing_r`, `foot_l`, 
 | `root` | gốc | tất cả (nhảy, nghiêng cả người) | 100, 226 |
 | `body` | `root` | `body` | 100, 224 |
 | `head` | `body` | `head`, `cap`, `brow_*`, `eyes_*`, `cheek_*`, `mouth`, `beak_*` | 100, 135 (gợi ý) |
-| `tag` | `body` | `tag` (thẻ tên gỗ tròn, đường kính khoảng 32 đơn vị, mặt mờ, kèm quai da lộn rất ngắn luồn qua lỗ ở đỉnh, thẻ sát cằm; lắc quanh lỗ) | 100, 145,6 |
+| `tag` | `body` | `tag` (thẻ tên gỗ tròn, đường kính khoảng 32 đơn vị, mặt mờ, kèm quai da lộn nhô khỏi mép thẻ khoảng 1/6 đường kính, thẻ dính sát cằm và chồng lên lông cằm; lắc quanh lỗ) | 100, 142,2 |
 | `eye_l`, `eye_r` | `head` | `eye_l`, `eye_r` (nhìn quanh, chớp mắt) | 64, 94 và 136, 94 |
 | `wing_l`, `wing_r` | `body` | `wing_l`, `wing_r` | 41, 149 và 159, 149 |
 | `foot_l`, `foot_r` | `root` | `foot_l`, `foot_r` | 71, 227 và 129, 227 |
