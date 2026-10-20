@@ -1,0 +1,75 @@
+<!doctype html>
+<meta charset="utf-8">
+<script src="../../packages/web/penguin.js"></script>
+<script>
+  // Renderer giả để kiểm tra giao thức registerRenderer: ghi lại các lần gọi, one-shot xong sau 300ms.
+  const log = [];
+  let failNext = null;
+  PenguinMascot.registerRenderer('fake', (root, ctx) => {
+    const c = document.createElement('canvas');
+    c.id = 'fake-canvas';
+    root.appendChild(c);
+    log.push('mount:' + ctx.variant);
+    if (failNext === 'throw') throw new Error('boom');
+    if (failNext === 'async') setTimeout(() => ctx.fail(new Error('load')), 50);
+    return {
+      play(state) {
+        log.push('play:' + state);
+        return /^(wave|happy|sad)$/.test(state) ? new Promise((r) => setTimeout(r, 300)) : Promise.resolve();
+      },
+      destroy() { log.push('destroy'); },
+    };
+  });
+</script>
+<penguin-mascot id="a" renderer="fake"></penguin-mascot>
+<penguin-mascot id="b" renderer="nope"></penguin-mascot>
+<pre id="out"></pre>
+<script>
+  (async () => {
+    const out = {};
+    const a = document.getElementById('a');
+    const mode = (el) => ({ canvas: !!el.shadowRoot.querySelector('#fake-canvas'), svg: !!el.shadowRoot.querySelector('svg') });
+    out.parsed = { a: mode(a), b: mode(document.getElementById('b')) };
+
+    // one-shot qua renderer: Promise và sự kiện animationdone, rồi về trạng thái lặp
+    const events = [];
+    a.addEventListener('animationdone', (e) => events.push('done:' + e.detail.state));
+    a.addEventListener('statechange', (e) => events.push('state:' + e.detail.state));
+    await a.play('think');
+    const r = await a.play('happy');
+    out.oneShot = { resolved: r, events: events.slice(), state: a.state };
+
+    // chạy lại cùng một trạng thái phải gọi lại renderer
+    log.length = 0;
+    await a.play('wave');
+    await a.play('wave');
+    out.replay = log.filter((l) => l === 'play:wave').length;
+
+    // đổi renderer về svg rồi hủy renderer
+    log.length = 0;
+    a.setAttribute('renderer', 'svg');
+    out.toSvg = { log: log.slice(), ...mode(a) };
+
+    // renderer ném lỗi lúc dựng: lùi về svg
+    failNext = 'throw';
+    const c = document.createElement('penguin-mascot');
+    const fb = [];
+    c.addEventListener('rendererfallback', (e) => fb.push(e.detail.renderer));
+    c.setAttribute('renderer', 'fake');
+    document.body.append(c);
+    out.throwFallback = { ...mode(c), events: fb };
+
+    // renderer báo lỗi nạp bất đồng bộ lúc đang chạy one-shot: lùi về svg, Promise vẫn resolve
+    failNext = 'async';
+    const d = document.createElement('penguin-mascot');
+    const fb2 = [];
+    d.addEventListener('rendererfallback', (e) => fb2.push(e.detail.renderer));
+    d.setAttribute('renderer', 'fake');
+    d.setAttribute('state', 'sad');
+    document.body.append(d);
+    const before = mode(d);
+    const res = await d.play('sad');
+    out.asyncFallback = { before, after: mode(d), events: fb2, resolved: res, state: d.state };
+    document.getElementById('out').textContent = JSON.stringify(out);
+  })();
+</script>

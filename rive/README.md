@@ -48,7 +48,7 @@ Gợi ý dựng (tên menu có thể khác theo phiên bản editor):
 
 1. **Layer `Mood`**: một state cho mỗi trạng thái lặp (`idle`, `think`, `sleep`, `dance`, `walk`, `talk`), mỗi state chạy một animation **Loop**. Chuyển giữa các state bằng điều kiện `mood == n` (n ở bảng dưới), từ bất kỳ state nào. State mặc định là `idle`.
 2. **Layer `OneShot`** (đặt dưới `Mood`, vì layer dưới được áp dụng sau nên ghi đè được tư thế): state mặc định rỗng (không animation). Với mỗi trigger, thêm một state chạy animation **One Shot** của nó, nối từ state rỗng (hoặc Any State) bằng điều kiện trigger, và nối ngược về state rỗng khi animation chạy xong.
-3. **Event `done`**: đặt một Event tên **`done`** ở khung cuối của mỗi animation một lần. Runtime nghe event này để báo cho app (`animationdone`, `onDone`). Mỗi lần chạy xong phải phát đúng một event.
+3. **Event `done`** (lưu ý: runtime Rive web hiện đánh dấu đọc input và nghe Rive Event ở runtime là *deprecated*, khuyên dùng data binding; hiện vẫn chạy và code đang dùng cách này, xem mục Rủi ro trong `docs/PLAN.md`): đặt một Event tên **`done`** ở khung cuối của mỗi animation một lần. Runtime nghe event này để báo cho app (`animationdone`, `onDone`). Mỗi lần chạy xong phải phát đúng một event.
 4. Khi `OneShot` về trạng thái rỗng thì `Mood` đang giữ tư thế lặp hiện tại, nên nhân vật tự quay về đúng trạng thái lặp gần nhất.
 5. **Phát lại**: kích lại cùng một trigger khi đang chạy (ví dụ sai hai lần liền) phải chạy lại từ đầu; kiểm tra bằng cách bấm trigger hai lần liên tiếp trong cửa sổ State Machine.
 

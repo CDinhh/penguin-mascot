@@ -56,6 +56,8 @@
   // Hiện chỉ có "plush", đăng ký ở cuối file.
   var DEFAULT_VARIANT = 'plush';
   var VARIANTS = {};
+  // Renderer bổ sung (ví dụ 'rive'), đăng ký bằng registerRenderer. Mặc định vẫn là SVG + CSS.
+  var RENDERERS = {};
 
   function fxLayer(opts) {
     var tear = (opts && opts.tear) || [0, 0];
@@ -322,25 +324,91 @@
   ].join('\n');
 
   var PenguinMascot = (typeof HTMLElement !== 'undefined') ? class extends HTMLElement {
-    static get observedAttributes() { return ['state', 'size', 'variant']; }
+    static get observedAttributes() { return ['state', 'size', 'variant', 'renderer']; }
 
     constructor() {
       super();
       this._root = this.attachShadow({ mode: 'open' });
       this._timer = null;
       this._base = 'idle';
+      this._current = '';
+      this._seq = 0;
+      this._failed = {};
+      this._mountId = 0;
+      this._pendingDone = null;
+      this._rendererName = 'svg';
+      this._renderer = null;
       this._render();
     }
 
-    /** Vẽ lại theo thuộc tính variant, giữ nguyên animation đang chạy */
+    /** Vẽ lại theo thuộc tính variant và renderer, giữ nguyên animation đang chạy */
     _render() {
+      this._teardownRenderer();
+      var want = this._wantedRenderer();
+      if (want !== 'svg' && this._mountRenderer(want)) return;
+      this._renderSvg();
+    }
+
+    _renderSvg() {
       var name = this._wantedVariant();
       var v = VARIANTS[name];
-      var prev = this._svg ? this._svg.dataset.state : '';
       this._variant = name;
+      this._rendererName = 'svg';
       this._root.innerHTML = '<style>' + CSS + '\n' + (v.css || '') + '</style>' + buildSVG(v);
       this._svg = this._root.querySelector('svg');
-      if (prev) this._svg.dataset.state = prev;
+      if (this._current) this._svg.dataset.state = this._current;
+    }
+
+    /** Renderer đang được yêu cầu: chỉ khi đã đăng ký và chưa lỗi nạp, còn lại dùng svg */
+    _wantedRenderer() {
+      var r = this.getAttribute('renderer') || 'svg';
+      return RENDERERS[r] && !this._failed[r] ? r : 'svg';
+    }
+
+    _mountRenderer(name) {
+      var self = this;
+      var token = ++this._mountId;
+      this._variant = this._wantedVariant();
+      this._root.innerHTML = '<style>' + CSS + '</style>';
+      this._svg = null;
+      var ctx = {
+        host: this,
+        variant: this._variant,
+        // renderer gọi khi không nạp được tài nguyên: lùi về SVG
+        fail: function (err) { if (self._mountId === token && self._rendererName === name) self._fallback(name, err); }
+      };
+      try {
+        this._renderer = RENDERERS[name](this._root, ctx);
+        this._rendererName = name;
+        this._renderer.play(this._base);
+        return true;
+      } catch (err) {
+        this._renderer = null;
+        this._fallback(name, err);
+        return true;
+      }
+    }
+
+    _fallback(name, err) {
+      this._failed[name] = true;
+      this._teardownRenderer();
+      this._renderSvg();
+      this.dispatchEvent(new CustomEvent('rendererfallback', { detail: { renderer: name, error: err } }));
+      // Đang chạy dở animation một lần bằng renderer cũ: SVG chạy lại nó và hẹn giờ xong, để Promise/sự kiện vẫn tới nơi
+      if (this._pendingDone) {
+        clearTimeout(this._timer);
+        this._timer = setTimeout(this._pendingDone, ONE_SHOT[this._current]);
+      }
+    }
+
+    _teardownRenderer() {
+      this._mountId++;
+      if (this._renderer) { try { this._renderer.destroy(); } catch (e) {} this._renderer = null; }
+      this._rendererName = 'svg';
+    }
+
+    disconnectedCallback() {
+      if (this._renderer) this._teardownRenderer();
     }
 
     /** Tên variant đang được yêu cầu; tên lạ thì dùng variant mặc định */
@@ -352,7 +420,7 @@
     connectedCallback() {
       // Với thẻ viết sẵn trong HTML, constructor chạy trước khi trình duyệt gán thuộc tính,
       // còn attributeChangedCallback bị bỏ qua khi chưa isConnected, nên phải vẽ lại ở đây.
-      if (this._variant !== this._wantedVariant()) this._render();
+      if (this._rendererName !== this._wantedRenderer() || this._variant !== this._wantedVariant()) this._render();
       this._applySize();
       this.play(this.getAttribute('state') || 'idle');
     }
@@ -361,10 +429,11 @@
       if (!this.isConnected || oldVal === newVal) return;
       if (name === 'size') this._applySize();
       if (name === 'variant') this._render();
-      if (name === 'state' && newVal !== this._svg.dataset.state) this.play(newVal || 'idle');
+      if (name === 'renderer') { this._failed = {}; this._render(); }
+      if (name === 'state' && newVal !== this._current) this.play(newVal || 'idle');
     }
 
-    get state() { return this._svg.dataset.state; }
+    get state() { return this._current; }
     set state(v) { this.play(v); }
 
     get variant() { return this._variant; }
@@ -386,24 +455,40 @@
         state = 'idle';
       }
       clearTimeout(this._timer);
-      // Khởi động lại animation nếu chạy lại cùng một trạng thái
-      this._svg.dataset.state = '';
-      void this._svg.getBoundingClientRect();
-      this._svg.dataset.state = state;
+      this._pendingDone = null;
+      var seq = ++this._seq;
+      this._current = state;
+      var done = null;
+      if (this._renderer) {
+        // Renderer ngoài (ví dụ rive): chạy lại cùng một trạng thái cũng phải phát lại, việc đó do renderer đảm nhiệm
+        done = this._renderer.play(state);
+      } else {
+        // Khởi động lại animation nếu chạy lại cùng một trạng thái
+        this._svg.dataset.state = '';
+        void this._svg.getBoundingClientRect();
+        this._svg.dataset.state = state;
+      }
 
+      this.dispatchEvent(new CustomEvent('statechange', { detail: { state: state } }));
       if (LOOPING.indexOf(state) !== -1) {
         this._base = state;
-        this.dispatchEvent(new CustomEvent('statechange', { detail: { state: state } }));
         return Promise.resolve(state);
       }
-      this.dispatchEvent(new CustomEvent('statechange', { detail: { state: state } }));
       return new Promise(function (resolve) {
-        self._timer = setTimeout(function () {
-          self._svg.dataset.state = self._base;
+        var finish = function () {
+          if (self._seq !== seq) return;
+          self._pendingDone = null;
+          clearTimeout(self._timer);
+          self._current = self._base;
+          // Renderer ngoài tự về trạng thái lặp (state machine); SVG thì đặt lại ở đây
+          if (self._svg) self._svg.dataset.state = self._base;
           self.dispatchEvent(new CustomEvent('animationdone', { detail: { state: state } }));
           self.dispatchEvent(new CustomEvent('statechange', { detail: { state: self._base } }));
           resolve(state);
-        }, ONE_SHOT[state]);
+        };
+        self._pendingDone = finish;
+        if (done) done.then(finish, finish);
+        else self._timer = setTimeout(finish, ONE_SHOT[state]);
       });
     }
 
@@ -431,9 +516,24 @@
     for (var i = 0; i < els.length; i++) if (els[i]._svg) els[i]._render();
   }
 
+  /**
+   * Đăng ký renderer khác SVG, chọn bằng thuộc tính renderer="ten".
+   * factory(root, ctx) trả về { play(state) -> Promise, destroy() }:
+   *   root  ShadowRoot để gắn canvas...; ctx = { host, variant, fail(err) }.
+   *   play: trạng thái lặp resolve ngay; trạng thái một lần resolve khi chạy xong.
+   *   fail(err): gọi khi không nạp được tài nguyên, thẻ tự lùi về SVG và phát sự kiện rendererfallback.
+   * Các thẻ đang yêu cầu renderer này sẽ được vẽ lại ngay.
+   */
+  function registerRenderer(name, factory) {
+    RENDERERS[name] = factory;
+    if (typeof document === 'undefined') return;
+    var els = document.querySelectorAll('penguin-mascot[renderer="' + name + '"]');
+    for (var i = 0; i < els.length; i++) if (els[i]._svg || els[i]._renderer) { els[i]._failed = {}; els[i]._render(); }
+  }
+
   var api = {
     CSS: CSS, CAP: CAP, HEART: heart, STAR: star, STATES: STATES, LOOPING: LOOPING, ONE_SHOT: ONE_SHOT,
-    VARIANTS: VARIANTS, buildSVG: buildSVG, registerVariant: registerVariant, define: define, PenguinMascot: PenguinMascot
+    VARIANTS: VARIANTS, buildSVG: buildSVG, registerVariant: registerVariant, registerRenderer: registerRenderer, define: define, PenguinMascot: PenguinMascot
   };
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
   if (typeof window !== 'undefined') window.PenguinMascot = api;

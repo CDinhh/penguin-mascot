@@ -1,0 +1,29 @@
+{
+  "name": "@prm393/penguin-mascot-react",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Component React <PenguinMascot state=\"happy\" />: Rive, lùi về web component khi không nạp được .riv",
+  "main": "src/index.ts",
+  "types": "src/index.ts",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "files": [
+    "src"
+  ],
+  "dependencies": {
+    "@rive-app/react-canvas": "4.37.0",
+    "@prm393/penguin-mascot": "1.0.0",
+    "@rive-app/canvas": "2.45.0"
+  },
+  "peerDependencies": {
+    "react": ">=18"
+  },
+  "devDependencies": {
+    "@types/react": "^19.0.0",
+    "react": "^19.0.0",
+    "typescript": "^5.6.0"
+  },
+  "license": "MIT"
+}

@@ -258,6 +258,7 @@ chạy đúng `wave` và `sad`; kích thước asset giảm từ khoảng 3MB xu
 | --- | --- |
 | Lông bản plush làm bằng filter; Rive không có filter đó | Nướng lông vào PNG từng bộ phận rồi rig bằng bone/mesh. Viền lông có thể lộ đường nối ở khớp: chồng lớp và chừa lề. |
 | Package `rive` cho Flutter: bản mới nhất 0.14 (runtime `rive_native`, nhanh nhất) cần **Dart ≥ 3.6**; app PRM393 đang khóa Dart `>=2.17.0 <3.0.0` | Xem quyết định ở mục 8. Bản `rive` 0.13.x chạy với Dart 2.17 nhưng là runtime cũ. |
+| Runtime Rive web (2.45) đánh dấu **deprecated** việc đọc `stateMachineInputs` và nghe Rive Event ở runtime, khuyên dùng data binding (view model). Hiện vẫn chạy | Hợp đồng rig dùng input + event `done` như plan. Phần gọi nằm gọn trong `RiveDriver` (web) và `PenguinMascot.tsx` (React) nên đổi sang data binding là sửa cục bộ; nên chốt hướng này với người dựng `.riv` trước khi dựng. Có thời gian chờ dự phòng khi thiếu event `done`. |
 | Cần người dựng animation trong Rive editor | Giai đoạn 0 đến 2 làm trước, không phụ thuộc; app tiếp tục dùng sprite sheet cho tới giai đoạn 6. |
 | Hai variant làm gấp đôi công dựng | Đã chốt: bỏ `classic`, chỉ làm `plush`. |
 
