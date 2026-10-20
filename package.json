@@ -1,27 +1,16 @@
 {
-  "name": "penguin-mascot",
+  "name": "penguin-mascot-monorepo",
+  "private": true,
   "version": "1.0.0",
-  "description": "Linh vật chim cánh cụt (SVG + CSS animation) dạng Web Component cho app học tập",
-  "main": "penguin.js",
-  "files": [
-    "penguin.js",
-    "penguin-plush.svg",
-    "spec",
-    "tools"
-  ],
+  "description": "BipBip, linh vật chim cánh cụt cho app học tập (monorepo: web, React, Flutter)",
+  "workspaces": ["packages/*"],
   "scripts": {
     "test": "node --test \"test/*.test.mjs\"",
+    "codegen": "node tools/codegen.mjs",
+    "codegen:check": "node tools/codegen.mjs --check",
+    "sync:root": "node tools/sync-root.mjs",
     "export:frames": "node tools/export-frames.mjs"
   },
-  "keywords": [
-    "mascot",
-    "penguin",
-    "svg",
-    "animation",
-    "web-component"
-  ],
-  "license": "MIT",
-  "engines": {
-    "node": ">=22"
-  }
+  "engines": { "node": ">=22" },
+  "license": "MIT"
 }
