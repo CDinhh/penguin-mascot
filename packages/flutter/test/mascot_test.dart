@@ -1,13 +1,11 @@
 import 'dart:convert';
 import 'dart:io';
-import 'dart:typed_data';
 import 'dart:ui' as ui;
 
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:penguin_mascot/penguin_mascot.dart';
-import 'package:penguin_mascot/src/sprite_sheets.dart';
 
 const _fw = 8;
 const _fh = 10;
@@ -51,7 +49,7 @@ Future<Uint8List> _png(int frames) async {
   return data!.buffer.asUint8List();
 }
 
-late _TestBundle bundle;
+late AssetBundle bundle;
 
 Future<void> _makeBundle() async {
   // idle/think lặp; wave/happy/sad một lần. Các state khác không có trong manifest.
