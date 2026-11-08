@@ -6,7 +6,8 @@
   "workspaces": [
     "packages/*",
     "examples/react",
-    "examples/web-rive"
+    "examples/web-rive",
+    "examples/web-3d"
   ],
   "scripts": {
     "test": "node --test \"test/*.test.mjs\"",

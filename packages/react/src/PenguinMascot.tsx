@@ -25,6 +25,16 @@ export interface PenguinMascotProps {
   reducedMotion?: boolean;
   /** Gọi khi không dùng được Rive và đã lùi về web component `<penguin-mascot>`. */
   onFallback?: (error: unknown) => void;
+  /**
+   * `'rive'` (mặc định) hoặc `'3d'`: model glTF vẽ bằng three.js (cần cài `three`; gói `@prm393/penguin-mascot-3d` được nạp khi cần).
+   * Không dùng được 3D (không có WebGL, không nạp được model) thì lùi về SVG.
+   */
+  renderer?: 'rive' | '3d';
+  /** Chỉ renderer 3D: hướng nhìn của mắt, -1..1 (như `lookX`/`lookY` của Rive). */
+  lookX?: number;
+  lookY?: number;
+  /** Chỉ renderer 3D: mắt tự nhìn theo con trỏ chuột. */
+  trackPointer?: boolean;
   className?: string;
   style?: CSSProperties;
 }
@@ -45,7 +55,46 @@ function useReducedMotion(force?: boolean): boolean {
  * BipBip bằng Rive; không nạp được file .riv (thiếu, hỏng, thiếu input theo spec) thì lùi về `<penguin-mascot>`.
  * API giống web component: `state`, `size`, `variant`, `onDone`.
  */
-export function PenguinMascot({
+export function PenguinMascot(props: PenguinMascotProps) {
+  return props.renderer === '3d' ? <ThreeDMascot {...props} /> : <RiveMascot {...props} />;
+}
+
+/** Renderer 3D: web component `<penguin-mascot renderer="3d">`, gói 3D (và three.js) chỉ được nạp khi dùng tới. */
+function ThreeDMascot({ state = 'idle', size = 200, cap = false, onDone, replayKey, lookX, lookY, trackPointer, onFallback, className, style }: PenguinMascotProps) {
+  const ref = useRef<MascotElement | null>(null);
+  const onDoneRef = useRef(onDone);
+  const onFallbackRef = useRef(onFallback);
+  onDoneRef.current = onDone;
+  onFallbackRef.current = onFallback;
+  const [loaded, setLoaded] = useState(false);
+
+  useEffect(() => {
+    let alive = true;
+    import('@prm393/penguin-mascot-3d').then(() => alive && setLoaded(true), (err) => { if (alive) { setLoaded(true); onFallbackRef.current?.(err); } });
+    return () => { alive = false; };
+  }, []);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const done = (e: Event) => onDoneRef.current?.((e as CustomEvent<{ state: MascotState }>).detail.state);
+    const fell = (e: Event) => onFallbackRef.current?.((e as CustomEvent<{ error: unknown }>).detail.error);
+    el.addEventListener('animationdone', done);
+    el.addEventListener('rendererfallback', fell);
+    return () => { el.removeEventListener('animationdone', done); el.removeEventListener('rendererfallback', fell); };
+  }, []);
+
+  useEffect(() => { if (loaded) ref.current?.play?.(state); }, [loaded, state, replayKey]);
+
+  const attrs: Record<string, unknown> = { ref, class: className, style, state, size: String(size), renderer: loaded ? '3d' : 'svg' };
+  if (cap) attrs.accessory = 'cap';
+  if (lookX !== undefined) attrs['look-x'] = String(lookX);
+  if (lookY !== undefined) attrs['look-y'] = String(lookY);
+  if (trackPointer) attrs['track-pointer'] = '';
+  return createElement('penguin-mascot', attrs);
+}
+
+function RiveMascot({
   state = 'idle', size = 200, variant = DEFAULT_VARIANT, cap = false, onDone, replayKey, src = RIVE.file, reducedMotion, onFallback, className, style,
 }: PenguinMascotProps) {
   const reduced = useReducedMotion(reducedMotion);

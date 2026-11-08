@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>BipBip 3D, ví dụ web</title>
+  <style>
+    body { font-family: system-ui, sans-serif; max-width: 760px; margin: 24px auto; padding: 0 16px; background: #eef1fa; color: #26325a }
+    #row { display: flex; gap: 24px; align-items: flex-end; flex-wrap: wrap }
+    #buttons button { margin: 2px }
+  </style>
+</head>
+<body>
+  <h1>BipBip 3D, ví dụ renderer="3d"</h1>
+  <p id="mode">Renderer: đang nạp model 3D...</p>
+  <div id="row">
+    <penguin-mascot id="pg" renderer="3d" state="idle" size="260" track-pointer></penguin-mascot>
+    <penguin-mascot renderer="3d" state="dance" size="120" accessory="cap"></penguin-mascot>
+    <penguin-mascot renderer="3d" state="sleep" size="72"></penguin-mascot>
+  </div>
+  <div id="buttons"></div>
+  <p><label><input type="checkbox" id="cap"> Đội mũ</label> · Di chuột để mắt nhìn theo con trỏ.</p>
+  <p id="log"></p>
+  <script type="module" src="./main.js"></script>
+</body>
+</html>

@@ -36,8 +36,8 @@ giữ nguyên và vẫn là đường lùi mặc định. Làm theo giai đoạn
 
 ## 3. Giai đoạn
 
-1. **Model + rig + 15 clip** (PR này): generator, GLB 3 mức LOD, test ngân sách và khớp spec, ảnh preview.
-2. **Web**: `packages/web-3d` (`<penguin-mascot-3d>` dùng three.js, cùng API `play()`, `state`, sự kiện `animationdone`),
+1. **Model + rig + 15 clip** (đã làm): generator, GLB 3 mức LOD, test ngân sách và khớp spec, ảnh preview.
+2. **Web** (đã làm, PR giai đoạn 2): `packages/web-3d` (`<penguin-mascot-3d>` dùng three.js, cùng API `play()`, `state`, sự kiện `animationdone`),
    tùy chọn `renderer="3d"` cho React, hướng dẫn `<model-viewer>`.
 3. **Flutter + game**: widget 3D trong `packages/flutter`, hướng dẫn nhập Unity và Godot (`docs/3D-ENGINES.md`).
 
