@@ -39,7 +39,9 @@ giữ nguyên và vẫn là đường lùi mặc định. Làm theo giai đoạn
 1. **Model + rig + 15 clip** (đã làm): generator, GLB 3 mức LOD, test ngân sách và khớp spec, ảnh preview.
 2. **Web** (đã làm, PR giai đoạn 2): `packages/web-3d` (`<penguin-mascot-3d>` dùng three.js, cùng API `play()`, `state`, sự kiện `animationdone`),
    tùy chọn `renderer="3d"` cho React, hướng dẫn `<model-viewer>`.
-3. **Flutter + game**: widget 3D trong `packages/flutter`, hướng dẫn nhập Unity và Godot (`docs/3D-ENGINES.md`).
+3. **Flutter + game** (đã làm, PR giai đoạn 3): `packages/flutter_3d` (`Mascot3D`, flutter_scene), script mẫu và hướng dẫn Unity, Godot (`docs/3D-ENGINES.md`).
+
+   Chọn `flutter_scene` (Flutter GPU, native) thay vì WebView (`model_viewer_plus`) vì cần mượt 60 FPS và chồng lên UI; vì nó đòi Flutter 3.47 nên làm gói riêng, `penguin_mascot` 2D giữ nguyên.
 
 ## 4. Hợp đồng rig (cho người dựng lại trong Blender)
 

@@ -1,0 +1,25 @@
+name: penguin_mascot_3d
+description: BipBip 3D cho Flutter (glTF, flutter_scene / Flutter GPU). Cùng API với penguin_mascot (MascotState, MascotController).
+version: 1.0.0
+publish_to: none
+
+environment:
+  sdk: ^3.10.0
+  flutter: ">=3.47.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  penguin_mascot:
+    path: ../flutter
+  flutter_scene: ^0.24.3
+  vector_math: ^2.1.4
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^5.0.0
+
+flutter:
+  assets:
+    - assets/mascot/
