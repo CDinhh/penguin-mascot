@@ -32,8 +32,9 @@ test('art/3d/*.glb trùng với kết quả dựng từ spec (chạy npm run bui
   for (const m of models) assert.ok(readFileSync(new URL(`art/3d/${m.lod.name}.glb`, root)).equals(m.buffer), m.lod.name);
 });
 
-test('bản chép trong packages/web-3d/models giống art/3d', () => {
-  for (const m of models) assert.ok(readFileSync(new URL(`packages/web-3d/models/${m.lod.name}.glb`, root)).equals(m.buffer), m.lod.name);
+test('bản chép trong packages/web-3d/models và packages/flutter_3d/assets giống art/3d', () => {
+  for (const m of models) for (const dir of ['packages/web-3d/models', 'packages/flutter_3d/assets/mascot'])
+    assert.ok(readFileSync(new URL(`${dir}/${m.lod.name}.glb`, root)).equals(m.buffer), `${dir}/${m.lod.name}`);
 });
 
 test('mỗi trạng thái trong spec có đúng một clip cùng tên và thời lượng', () => {

@@ -130,7 +130,7 @@ Ví dụ Flutter nằm trong repo PRM393_G6_FE (`Mascot` trong `lib/widgets/`). 
 
 ## Bản 3D
 
-Ngoài bản 2D còn có model 3D glTF có rig và đủ 15 clip, dùng chung cho web, app và game. Kế hoạch và hợp đồng rig: [`docs/PLAN-3D.md`](docs/PLAN-3D.md); file model và ngân sách: [`art/3d/README.md`](art/3d/README.md) (dựng lại bằng `npm run build:3d`); web: [`packages/web-3d/README.md`](packages/web-3d/README.md) (`<penguin-mascot renderer="3d">`, React `renderer="3d"`).
+Ngoài bản 2D còn có model 3D glTF có rig và đủ 15 clip, dùng chung cho web, app và game. Kế hoạch và hợp đồng rig: [`docs/PLAN-3D.md`](docs/PLAN-3D.md); file model và ngân sách: [`art/3d/README.md`](art/3d/README.md) (dựng lại bằng `npm run build:3d`); web: [`packages/web-3d/README.md`](packages/web-3d/README.md) (`<penguin-mascot renderer="3d">`, React `renderer="3d"`); Flutter: [`packages/flutter_3d/README.md`](packages/flutter_3d/README.md) (`Mascot3D`); Unity và Godot: [`docs/3D-ENGINES.md`](docs/3D-ENGINES.md).
 
 ## Cấu trúc monorepo
 
@@ -141,6 +141,7 @@ packages/web-rive    renderer="rive" cho web component (có đường lùi về 
 packages/web-3d      renderer="3d" cho web component (three.js + glTF, có đường lùi về SVG)
 packages/react       component <PenguinMascot> (Rive, lùi về web component)
 packages/flutter     widget Flutter `Mascot` (Rive, lùi về sprite sheet)
+packages/flutter_3d  widget Flutter `Mascot3D` (glTF, flutter_scene, lùi về 2D)
 art/3d               model glTF 3D (GLB + 2 LOD), sinh bởi tools/model3d
 art/plush            bộ phận PNG + fx SVG để nhập vào Rive (export-layers)
 rive/README.md       hợp đồng rig và hướng dẫn dựng bipbip.riv

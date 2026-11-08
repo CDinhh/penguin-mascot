@@ -34,3 +34,23 @@ jobs:
         working-directory: examples/flutter
       - run: flutter analyze
         working-directory: examples/flutter
+
+  flutter-3d:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+      - run: flutter pub get
+        working-directory: packages/flutter_3d
+      - run: flutter analyze
+        working-directory: packages/flutter_3d
+      - run: flutter test
+        working-directory: packages/flutter_3d
+      # importer chính thức của flutter_scene phải nhận được model (animation, skin, extension)
+      - run: |
+          for f in bipbip bipbip_lod1 bipbip_lod2; do
+            dart run flutter_scene:import -i assets/mascot/$f.glb -o /tmp/$f.fsceneb
+          done
+        working-directory: packages/flutter_3d
