@@ -139,8 +139,9 @@ class _Mascot3DState extends State<Mascot3D> {
       ?..cap = widget.cap
       ..lookX = widget.lookX
       ..lookY = widget.lookY;
-    if (old.state != widget.state || old.replayKey != widget.replayKey)
+    if (old.state != widget.state || old.replayKey != widget.replayKey) {
       _apply();
+    }
     final dpr = MediaQuery.maybeOf(context)?.devicePixelRatio ?? 1;
     final lod = widget.lod ?? Mascot3DConfig.lodForPixels(widget.size * dpr);
     if (lod != _loadedLod) _load(lod);
