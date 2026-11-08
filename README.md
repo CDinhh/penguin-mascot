@@ -128,19 +128,26 @@ Ví dụ Flutter nằm trong repo PRM393_G6_FE (`Mascot` trong `lib/widgets/`). 
 
 `npm run export:layers` tách từng bộ phận của bản bông ra PNG 3x trong suốt (`art/plush/`, lông đã nướng sẵn) cùng `parts.json`, bảng vị trí `parts.md` và hiệu ứng SVG (`art/plush/fx/`); thêm `-- --verify` để ghép lại và so với hình gốc. Hợp đồng rig và hướng dẫn dựng `bipbip.riv` ở [`rive/README.md`](rive/README.md).
 
+## Bản 3D
+
+Ngoài bản 2D còn có model 3D glTF có rig và đủ 15 clip, dùng chung cho web, app và game. Kế hoạch và hợp đồng rig: [`docs/PLAN-3D.md`](docs/PLAN-3D.md); file model và ngân sách: [`art/3d/README.md`](art/3d/README.md) (dựng lại bằng `npm run build:3d`); web: [`packages/web-3d/README.md`](packages/web-3d/README.md) (`<penguin-mascot renderer="3d">`, React `renderer="3d"`).
+
 ## Cấu trúc monorepo
 
 ```text
 spec/mascot.json     nguồn sự thật: trạng thái, thời lượng, loop, input Rive
 packages/web         web component <penguin-mascot> (@prm393/penguin-mascot, chưa publish)
 packages/web-rive    renderer="rive" cho web component (có đường lùi về SVG)
+packages/web-3d      renderer="3d" cho web component (three.js + glTF, có đường lùi về SVG)
 packages/react       component <PenguinMascot> (Rive, lùi về web component)
 packages/flutter     widget Flutter `Mascot` (Rive, lùi về sprite sheet)
+art/3d               model glTF 3D (GLB + 2 LOD), sinh bởi tools/model3d
 art/plush            bộ phận PNG + fx SVG để nhập vào Rive (export-layers)
 rive/README.md       hợp đồng rig và hướng dẫn dựng bipbip.riv
 tools/               codegen, export-frames, export-layers, ...
 examples/web         trang demo (SVG)
 examples/web-rive    demo renderer="rive" (Vite)
+examples/web-3d      demo renderer="3d" (Vite)
 examples/react       demo React (Vite)
 docs/PLAN.md         kế hoạch nhiều nền tảng
 ```

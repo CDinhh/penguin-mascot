@@ -5,6 +5,7 @@ export function App() {
   const [state, setState] = useState<MascotState>('idle');
   const [replay, setReplay] = useState(0);
   const [reduced, setReduced] = useState(false);
+  const [threeD, setThreeD] = useState(false);
   const [mode, setMode] = useState('đang nạp Rive...');
   const [log, setLog] = useState<string[]>([]);
 
@@ -20,6 +21,8 @@ export function App() {
           size={220}
           replayKey={replay}
           reducedMotion={reduced}
+          renderer={threeD ? '3d' : 'rive'}
+          trackPointer={threeD}
           onDone={(s) => setLog((l) => [`xong: ${s}`, ...l].slice(0, 6))}
           onFallback={() => setMode('web component (không nạp được rive/bipbip.riv)')}
         />
@@ -33,6 +36,8 @@ export function App() {
           </div>
           <p>
             <label><input type="checkbox" checked={reduced} onChange={(e) => setReduced(e.target.checked)} /> Giảm chuyển động</label>
+            {' '}
+            <label><input type="checkbox" checked={threeD} onChange={(e) => setThreeD(e.target.checked)} /> Bản 3D</label>
           </p>
           <p data-testid="log">{log.join(' | ') || 'chưa có animation nào xong'}</p>
         </div>

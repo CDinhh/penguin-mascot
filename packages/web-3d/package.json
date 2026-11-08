@@ -1,0 +1,14 @@
+{
+  "name": "@prm393/penguin-mascot-3d",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Renderer 3D (three.js, glTF) cho <penguin-mascot>: thêm renderer=\"3d\", tự lùi về SVG khi không nạp được model",
+  "main": "src/index.js",
+  "types": "src/index.d.ts",
+  "exports": { ".": { "types": "./src/index.d.ts", "default": "./src/index.js" }, "./driver": "./src/driver.js", "./models/*": "./models/*" },
+  "files": ["src", "models"],
+  "peerDependencies": { "@prm393/penguin-mascot": "1.0.0", "three": ">=0.162.0" },
+  "devDependencies": { "three": "0.170.0" },
+  "license": "MIT"
+}
