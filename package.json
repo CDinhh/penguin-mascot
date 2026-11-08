@@ -14,7 +14,9 @@
     "codegen:check": "node tools/codegen.mjs --check",
     "sync:root": "node tools/sync-root.mjs",
     "export:frames": "node tools/export-frames.mjs",
-    "export:layers": "node tools/export-layers.mjs"
+    "export:layers": "node tools/export-layers.mjs",
+    "build:3d": "node tools/model3d/build.mjs",
+    "build:3d:check": "node tools/model3d/build.mjs --check"
   },
   "engines": {
     "node": ">=22"

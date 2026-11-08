@@ -1,0 +1,112 @@
+{
+  "generatedBy": "tools/model3d/build.mjs",
+  "lods": {
+    "bipbip": {
+      "file": "bipbip.glb",
+      "bytes": 1176920,
+      "triangles": 7116,
+      "drawCalls": 11,
+      "textures": 5,
+      "textureBytes": 423826,
+      "materials": 15,
+      "hiddenToggleTriangles": 4832
+    },
+    "bipbip_lod1": {
+      "file": "bipbip_lod1.glb",
+      "bytes": 928936,
+      "triangles": 2634,
+      "drawCalls": 11,
+      "textures": 5,
+      "textureBytes": 423826,
+      "materials": 15,
+      "hiddenToggleTriangles": 2226
+    },
+    "bipbip_lod2": {
+      "file": "bipbip_lod2.glb",
+      "bytes": 623428,
+      "triangles": 1446,
+      "drawCalls": 11,
+      "textures": 1,
+      "textureBytes": 168394,
+      "materials": 15,
+      "hiddenToggleTriangles": 2132
+    }
+  },
+  "animations": {
+    "idle": {
+      "keys": 230,
+      "durationMs": 2800,
+      "loop": true
+    },
+    "think": {
+      "keys": 315,
+      "durationMs": 3000,
+      "loop": true
+    },
+    "sleep": {
+      "keys": 387,
+      "durationMs": 3000,
+      "loop": true
+    },
+    "dance": {
+      "keys": 500,
+      "durationMs": 1600,
+      "loop": true
+    },
+    "walk": {
+      "keys": 478,
+      "durationMs": 1800,
+      "loop": true
+    },
+    "talk": {
+      "keys": 244,
+      "durationMs": 640,
+      "loop": true
+    },
+    "wave": {
+      "keys": 429,
+      "durationMs": 2000,
+      "loop": false
+    },
+    "happy": {
+      "keys": 390,
+      "durationMs": 1200,
+      "loop": false
+    },
+    "celebrate": {
+      "keys": 1542,
+      "durationMs": 2600,
+      "loop": false
+    },
+    "sad": {
+      "keys": 424,
+      "durationMs": 2600,
+      "loop": false
+    },
+    "surprised": {
+      "keys": 475,
+      "durationMs": 1400,
+      "loop": false
+    },
+    "no": {
+      "keys": 345,
+      "durationMs": 1200,
+      "loop": false
+    },
+    "yes": {
+      "keys": 279,
+      "durationMs": 1200,
+      "loop": false
+    },
+    "love": {
+      "keys": 634,
+      "durationMs": 2400,
+      "loop": false
+    },
+    "streak": {
+      "keys": 618,
+      "durationMs": 2400,
+      "loop": false
+    }
+  }
+}
